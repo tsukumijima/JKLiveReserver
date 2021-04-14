@@ -1,153 +1,49 @@
-[![](https://img.shields.io/badge/Origin-tsukumijima-28a745?style=for-the-badge)](https://github.com/tsukumijima/JKCommentCrawler)
-![GitHub](https://img.shields.io/github/license/yt4687/Tomoyo-nicoLiveReserver-?style=for-the-badge)
-![GitHub](https://img.shields.io/badge/Python-3.8-3376AB?style=for-the-badge&logo=Python)
-![](https://img.shields.io/badge/OS-Windows-0078D6?style=for-the-badge&logo=Windows)
-[![](https://img.shields.io/badge/Using-niconico-231815?style=for-the-badge&logo=niconico)](https://nicovideo.jp)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/yt4687/nicoLiveReserver?style=for-the-badge)](https://github.com/yt4687/nicoLiveReserver/releases)
 
-# nicoLiveReserver
-ニコニコ生放送の放送枠の予約をCLIから行うツールです。  
+# JKLiveReserver
 
-
-新ニコニコ実況移行後に廃止されたチャンネルの非公式実況コミュニティが手動でしている実況枠の作成を自動化できたらいいなという思いで作りました。
-
-
-使う際は[https://commons.nicovideo.jp/material/nc235573](https://commons.nicovideo.jp/material/nc235573)に利用登録していただけると嬉しいです。
+ニコニコ実況用の番組を CLI で予約するツールです。
 
 ## 注意
 
 - このツールの利用には基本的にニコニコのプレミアムアカウントが必要です。  
-  - 生放送を行うためにはプレミアムアカウントが必須です。  
+  - 30分以上の生放送を行うためにはニコニコのプレミアムアカウントが必須です。  
 - 生放送を行う際にはニコニコ側のユーザー生放送の制限がかかります。  
-  - ユーザー生放送の最大配信時間は6時間まで（これ以上の時間を指定するときは後述）
-  - 同一時間に同じユーザーで複数の配信はできない。
-  - そのほかユーザー生放送作成画面でできない設定はこのツールでもできないので注意してください。
-- このツールはニコニコ動画のサーバと通信します。負荷をかける改造は慎むようにお願いします。
-
+  - ユーザー生放送の最大配信時間は6時間までです。
+  - 同一時間に同じユーザーで複数の配信はできません。
+- ini 内のログイン情報を変更したときは、cookie.dump を一旦削除してから JKLiveReserver を実行してください。
+  - cookie.dump は Cookie を保存しているファイルで、このファイルがあるとセッションが切れるまで再ログインを行いません。
 
 ## インストール
 
-[ここ](https://github.com/yt4687/nicoLiveReserver/releases)からダウンロードします。ダウンロードできたら解凍し、適当なフォルダに配置します。  
+[ここ](https://github.com/tsukumijima/JKLiveReserver/releases)からダウンロードします。  
+あるいは、GitHub の画面内にある緑色の［Code］ボタンをクリックすると［Download Zip］ボタンが表示されるので、ボタンをクリックしてダウンロードします。
 
-あるいは、GitHub の画面内にある緑色の［Code］ボタンをクリックすると［Download Zip］ボタンが表示されるので、ボタンをクリックしてダウンロードすることもできます。 
+ダウンロードできたら解凍し、適当なフォルダに配置します。
 
 ### 設定
 
-nicoLiveReserver を使う前には設定が必要です。まずは nicoLiveReserver.example.ini を nicoLiveReserver.ini にコピーしましょう。
+JKLiveReserver を使う前には設定が必要です。まずは JKLiveReserver.example.ini を JKLiveReserver.ini にコピーしましょう。
 
-その後、nicoLiveReserver.ini を編集します。  
-編集箇所は ニコニコにログインするメールアドレス・ニコニコにログインするパスワードです。  
-設定項目は間違えるとニコニコ側からエラーが返されるので注意してください。必要に応じて例があります。  
+その後、JKLiveReserver.ini を編集します。  
+編集箇所は ニコニコにログインするメールアドレス・ニコニコにログインするパスワードの 2 つです。
 
-ニコニコにログインするメールアドレス / パスワードも指定します。前述の通り、基本的にプレミアムアカウントのログイン情報が必要です。
-
-次に、data.example.ini を data.ini または必要に応じて好きな名前に変更します。（このファイルが標準設定になります）  
-その後、nicoLiveReserver.ini を編集します。  
-最低限編集が必要なのは、タイトル、説明欄、タグ、コミュニティIDです。  
-コミュニティIDがないと予約が行えません。  
-設定項目は間違えるとニコニコ側からエラーが返されるので注意してください。必要に応じて例があります。 
+nicologin_mail / nicologin_password にそれぞれニコニコにログインするメールアドレス / パスワードを指定します。  
+前述の通り、基本的にプレミアムアカウントのログイン情報が必要です。
 
 これで設定は完了です。
 
 ### 実行方法
 
-nicoLiveReserver は Python スクリプトですが、わざわざ環境をセットアップするのも少し手間かなと思ったので、単一の実行ファイルにまとめたものも同梱しています。  
+JKLiveReserver は Python スクリプトですが、わざわざ環境をセットアップするのも少し手間かなと思ったので、単一の実行ファイルにまとめたものも同梱しています。  
+JKLiveReserver.exe は Windows 用、拡張子なしの JKLiveReserver は Linux 用の実行ファイルです。  
 こちらのバイナリを使ったほうが手軽ですが、一方で特に Windows の場合、Python から普通に実行するときと比べ起動に数秒時間がかかるというデメリットもあります。  
+このほか Linux 環境では、ツールを実行する前に `chmod` で JKLiveReserver ファイルに実行許可を付与しておく必要があるかもしれません。
 
 Python から普通に実行する場合は、別途依存ライブラリのインストールが必要です。  
 `pip install -r requirements.txt` ( pip が Python2 の事を指すシステムの場合は pip3 ) と実行し、依存ライブラリをインストールします。  
 Python 3.8 で検証しています。Python 2 系は論外として、3.8 未満のバージョンでは動かないかもしれません。
 
-## 使い方
-
-基本の使い方は以下のようになります。  
-ここでは exe 版を使っているものとして説明します。他の実行方法でも拡張子が変わったりなかったりするだけで使い方は同じです。  
-このツールの設定項目は、実況チャンネル、配信日付、配信時間、配信時間になります。  
-
-このツールは配信時間が６時間を超える放送時間を設定した場合、自動で分割して設定された時間分の番組を作成します。  
-(例、24時間分作成するときは、ユーザー生放送は1回6時間までの制限なので、4本に分割されて作成されます)  
-予約時刻は、必ず5分単位で設定してください。エラーで予約できません。  
-実況チャンネルまたは ini が指定されない場合は data.ini を標準で参照します。
-
-配信時間は、オプションで設定し必要に合わせて組み合わせて使えます。  
-```
-positional arguments:
-  Date                  予約をする日付 (ex: 2020/12/19)
-  Time                  予約を開始する時間 (ex: 04:00)
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -ch JKCHANNEL, --jkchannel JKCHANNEL
-                        予約する実況コミュニティを指定します。指定した場合はプリセットのini情報が自動的にセットされますが必要に応じてiniを指定することもできます。   
-  -ho HOURS, --hours HOURS
-                        放送する時間（時）、チャンネル以外では最大放送時間が6時間までなので6時間以降は分割されます (ex: 24)
-  -m MINUTES, --minutes MINUTES
-                        放送する時間（分）配信時間を30分に設定、または30分追加するときに使います
-  -ini INIFILE, --inifile INIFILE
-                        読み込む設定ファイルを指定。指定されない時は data.ini を読みます (ex. NHKBS1.ini)
-  -v, --version         バージョン情報を表示する
-```
-```
--ch で予約する実況チャンネルを指定できます。
--ho で1時間単位の配信時間の設定ができます。  
--m で配信時間を30分追加または設定ができます。  
-（ニコニコ側の使用で30分単位しか使えないので、-m オプションで設定できる数字は30のみです。現状わざと明示的に入れるようにしています）
--ini 生放送を予約するときに使う設定ファイルを切り替えられます。必ず同じフォルダ内に入れてファイル名と拡張子のみを入力するようにしてください。(省略可)
-```
-具体例  
-```
-./nicoLiveReserver.exe 2021/01/31 04:00 -ch jk101 -ho 1 -m 30
-```
-`-ch jk101`には予約したい実況チャンネルが入ります。（指定可能なチャンネルは下記）
-`2021/01/31` には予約したい日の日付が、04:00には配信を開始したい時間が入ります。  
-`-ho 1` は配信したい時間数を入力 `-m 30` は配信時間を30分、または30分追加するときに入力します。  
-
-jk101 に配信時間を30分にしたいときはこうなります。  
-```
-./nicoLiveReserver.exe -ch jk101 2021/01/31 04:00 -m 30
-```
-jk101 に配信時間を1時間にしたいときはこうなります。
-```
-./nicoLiveReserver.exe -ch jk101 2021/01/31 04:00 -ho 1
-```
-jk101 に配信時間を1時間30分にしたいときはこうなります。
-```
-./nicoLiveReserver.exe -ch jk101 2021/01/31 04:00 -ho 1 -m 30
-```
-
-ini を指定する場合（実況チャンネルに存在しないコミュニティを予約する場合はこちらを使います）
-data2.ini というiniファイルを指定して、配信時間を1時間にしたいときはこうなります。
-```
-./nicoLiveReserver.exe 2021/01/31 04:00 -ho 1 -ini data2.ini
-```
-data2.ini というiniファイルを指定して、配信時間を1時間30分にしたいときはこうなります。
-```
-./nicoLiveReserver.exe 2021/01/31 04:00 -ho 1 -m 30 -ini data2.ini
-```
-jk101 data2.ini を使って配信時間を1時間30分にしたいときはこうなります。
-```
-./nicoLiveReserver.exe -ch jk101 2021/01/31 04:00 -ho 1 -m 30 -ini data2.ini
-```
-指定可能なチャンネル一覧
-```
-        jk10: テレ玉
-        jk11: tvk'
-        jk101: NHK BS1
-        jk103: NHK BSプレミアム
-        jk141: BS日テレ
-        jk151: BS朝日
-        jk161: BS-TBS
-        jk171: BSテレ東
-        jk181: BSフジ
-        jk191: WOWOW PRIME
-        jk192: WOWOW LIVE
-        jk193: WOWOW CINEMA
-        jk222: BS12
-        jk333: AT-X
-```
-
-
-不具合報告は [Issues](https://github.com/yt4687/nicoLiveReserver/issues) までお願いします。
+build.sh を実行すればバイナリを自ビルドできますが、PyInstaller と依存ライブラリ諸々が Windows と WSL 側両方に入っている事が前提のため、他の環境でビルドできるかは微妙です。
 
 ## License
 [MIT License](LICENSE.txt)
