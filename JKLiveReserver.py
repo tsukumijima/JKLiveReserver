@@ -113,16 +113,16 @@ def main():
 
     def post(real_datetime, real_length):
 
-        # 0.5 秒待つ
-        time.sleep(0.5)
+        # インスタンスを作成
+        jklive = JKLive.JKLive(jikkyo_id, real_datetime, real_length, nicologin_mail, nicologin_password)
 
         print('-' * shutil.get_terminal_size().columns)
-        print(f"番組タイトル: {jikkyo_channel}【ニコニコ実況】{real_datetime.strftime('%Y年%m月%d日 %H:%M')}～{(real_datetime + real_length).strftime('%H:%M')}")
+        print(f"番組タイトル: {jklive.generateTitle()}")
         print(f"番組開始時刻: {real_datetime.strftime('%Y/%m/%d %H:%M:%S')}  " +
               f"番組終了時刻: {(real_datetime + real_length).strftime('%Y/%m/%d %H:%M:%S')}")
 
-        # インスタンスを作成
-        jklive = JKLive.JKLive(jikkyo_id, real_datetime, real_length, nicologin_mail, nicologin_password)
+        # 0.5 秒待つ
+        time.sleep(0.5)
 
         # 番組を予約する
         result = jklive.reserve()
@@ -130,7 +130,7 @@ def main():
         # 番組予約の成功/失敗
         if result['meta']['status'] == 201:
             print(f"生放送の予約に成功しました。放送 ID は {result['data']['id']} です。")
-            print(f"URL: https://live2.nicovideo.jp/watch/{result['data']['id']}")
+            print(f"URL: https://live.nicovideo.jp/watch/{result['data']['id']}")
         else:
             print(f"生放送の予約に失敗しました。status: {result['meta']['status']} errorcode: {result['meta']['errorCode']}")
             if 'data' in result:

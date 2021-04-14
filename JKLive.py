@@ -51,7 +51,7 @@ class JKLive:
         'OVERLAP_COMMUNITY': '同一コミュニティで他に重複した別ユーザの放送の予定があります。',
         'NOT_PREMIUM_USER': 'プレミアムユーザではないため、番組を予約できません。',
         'PENALIZED_USER': '配信ペナルティを受けています。',
-        'OVERLAP_PROGRAM_PROVIDER': '該当時間に別の同ユーザの放送予定があります。',
+        'OVERLAP_PROGRAM_PROVIDER': '該当時間に同じユーザの別の放送予定があります。',
         'NO_PERMISSION': '許可のない操作が行われました。',
         'UNDER_MANTENANCE': 'メンテナンス中です。',
         'SERVICE_ERROR': '一時的なサーバ不調によりリクエストに失敗しました（リトライすると直る可能性もありますし、障害の可能性もあります）。',
@@ -87,6 +87,12 @@ class JKLive:
         # ログインセッションを取得
         user_session = self.__login()
 
+        # 番組タイトル
+        title = self.generateTitle()
+
+        # 番組説明
+        description = self.generateDescription()
+
         # タグ
         tags = [
             {'label':'ニコニコ実況', 'isLocked': True},
@@ -107,10 +113,10 @@ class JKLive:
         payload = {
             # コミュニティID
             'communityId': self.community_id,
-            # タイトル
-            'title': f"{self.jikkyo_channel}【ニコニコ実況】{self.datetime.strftime('%Y年%m月%d日 %H:%M')}～{(self.datetime + self.length).strftime('%H:%M')}",
-            # 説明
-            'description': 'ニコニコ実況は、放送中のテレビ番組や起きているイベントに対して、みんなでコメントをし盛り上がりを共有する、リアルタイムコミュニケーションサービスです。',
+            # 番組タイトル
+            'title': title,
+            # 番組説明
+            'description': description,
             # 番組開始時刻
             'reservationBeginTime': self.datetime.isoformat(),
             # 番組時間（分単位）
@@ -219,3 +225,34 @@ class JKLive:
                 pickle.dump(session.cookies, f)
 
             return session.cookies.get('user_session')
+
+    # 番組タイトルを生成する
+    def generateTitle(self):
+
+        return f"{self.jikkyo_channel}【ニコニコ実況】{self.datetime.strftime('%Y年%m月%d日 %H:%M')}～{(self.datetime + self.length).strftime('%H:%M')}"
+
+    # 番組説明を生成する
+    def generateDescription(self):
+
+        description = 'ニコニコ実況は、放送中のテレビ番組や起きているイベントに対して、みんなでコメントをし盛り上がりを共有する、リアルタイムコミュニケーションサービスです。<br>'
+        description += '<br>'
+
+        for jikkyo_id, jikkyo_channel in self.jikkyo_channel_table.items():
+
+            # 注釈を入れる
+            if jikkyo_id == 'jk1':
+                description += '<b>地デジ</b><br>'
+            if jikkyo_id == 'jk101':
+                description += '<br>'
+                description += '<b>BS</b><br>'
+            if jikkyo_id == 'jk236':
+                description += '<br>'
+                description += '<b>CS</b><br>'
+
+            # 現在のチャンネルの情報を追記していく
+            description += f"{jikkyo_channel['name']}：{jikkyo_channel['id']} ({jikkyo_id})<br>"
+
+        description += '<br>'
+        description += 'この実況枠は JKLiveReserver（https://git.io/JOGdT）によって自動登録されています。<br>'
+
+        return description
