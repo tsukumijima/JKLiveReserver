@@ -113,6 +113,9 @@ def main():
 
     def post(real_datetime, real_length):
 
+        # 0.5 秒待つ
+        time.sleep(0.5)
+
         # インスタンスを作成
         jklive = JKLive.JKLive(jikkyo_id, real_datetime, real_length, nicologin_mail, nicologin_password)
 
@@ -120,9 +123,6 @@ def main():
         print(f"番組タイトル: {jklive.generateTitle()}")
         print(f"番組開始時刻: {real_datetime.strftime('%Y/%m/%d %H:%M:%S')}  " +
               f"番組終了時刻: {(real_datetime + real_length).strftime('%Y/%m/%d %H:%M:%S')}")
-
-        # 0.5 秒待つ
-        time.sleep(0.5)
 
         # 番組を予約する
         result = jklive.reserve()
