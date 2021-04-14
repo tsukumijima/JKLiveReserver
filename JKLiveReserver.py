@@ -18,10 +18,10 @@ __version__ = '2.1.0'
 def main():
 
     # 引数解析
-    parser = argparse.ArgumentParser(description = 'ニコニコ実況用の番組を CLI で予約するツール', formatter_class = argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description = 'ニコニコ実況用の番組の配信を CLI で予約するツール', formatter_class = argparse.RawTextHelpFormatter)
     parser.add_argument('Channel', help='予約する実況チャンネルのID (ex: jk101)')
     parser.add_argument('DateTime', help='予約する番組の開始時刻 (ex: 2021/04/15/04:00) now を指定すると今日もしくは明日の朝4時に設定されます')
-    parser.add_argument('Duration', help='予約する番組の放送時間の長さ (ex: 24) 最大放送時間が6時間までのため、6時間以降は番組が分割されます')
+    parser.add_argument('Duration', help='予約する番組の配信時間の長さ (ex: 24) 最大配信時間が6時間までのため、6時間以降は番組を分割して予約します。')
     parser.add_argument('-v', '--version', action='version', help='バージョン情報を表示する', version='JKLiveReserver version ' + __version__)
     args = parser.parse_args()
 
@@ -45,7 +45,7 @@ def main():
     else:
         datetime = dateutil.parser.parse(args.DateTime.rstrip()).astimezone()
 
-    # 予約する番組の放送時間の長さ
+    # 予約する番組の配信時間の長さ
     duration = dt.timedelta(hours=int(args.Duration))
 
     # 行区切り
