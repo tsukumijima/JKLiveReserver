@@ -20,7 +20,7 @@ __version__ = '2.1.0'
 def main():
 
     # 引数解析
-    parser = argparse.ArgumentParser(description = 'ニコニコ実況用の番組の配信を CLI で予約するツール', formatter_class = argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description = 'ニコニコ実況用のコミュニティ番組を一括で予約（枠取り）するツール', formatter_class = argparse.RawTextHelpFormatter)
     parser.add_argument('Channel', help='予約する実況チャンネルのID (ex: jk101)')
     parser.add_argument('-d', '--date', default=None, help='予約する番組の開始時刻 (ex: 2021/04/15/04:00)\n省略すると現在時刻以降の朝4時の日付に設定されます')
     parser.add_argument('-l', '--length', default=168, help='予約する番組の配信時間の長さ (ex: 24)\n省略すると 168（7日間）に設定されます\n最大配信時間が6時間までのため、6時間以降は番組を分割して予約します')
