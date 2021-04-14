@@ -2,6 +2,7 @@
 
 import argparse
 import configparser
+import copy
 import datetime as dt
 import dateutil.parser
 import json
@@ -47,6 +48,7 @@ def main():
 
     # 予約する番組の配信時間の長さ
     duration = dt.timedelta(hours=int(args.Duration))
+    duration_hour = int(args.Duration)
 
     # 行区切り
     print('=' * shutil.get_terminal_size().columns)
@@ -60,6 +62,11 @@ def main():
     if datetime < now_datetime :
         print(f"生放送の予約に失敗しました。")
         print(f"エラー: {datetime.strftime('%Y/%m/%d %H:%M')} はすでに過ぎた日付です。予約可能な期間は予約日から1週間です。")
+        print('=' * shutil.get_terminal_size().columns)
+        sys.exit(1)
+    if duration_hour < 1 :
+        print(f"生放送の予約に失敗しました。")
+        print(f"エラー: 予約する番組の配信時間の長さが不正です。")
         print('=' * shutil.get_terminal_size().columns)
         sys.exit(1)
 
@@ -90,21 +97,29 @@ def main():
     nicologin_mail = config.get('Default', 'nicologin_mail')
     nicologin_password = config.get('Default', 'nicologin_password')
 
-    print(f"{JKLive.JKLive.getJikkyoChannelName(jikkyo_id)} の実況番組を " +
-          f"{datetime.strftime('%Y/%m/%d %H:%M')} から {(datetime + duration).strftime('%Y/%m/%d %H:%M')} まで予約します。")
-    print('-' * shutil.get_terminal_size().columns)
+    # 実況チャンネル名
+    jikkyo_channel = JKLive.JKLive.getJikkyoChannelName(jikkyo_id)
+
+    print(f"{jikkyo_channel} の実況番組を " +
+        f"{datetime.strftime('%Y/%m/%d %H:%M')} から {(datetime + duration).strftime('%Y/%m/%d %H:%M')} まで予約します。")
+    print('=' * shutil.get_terminal_size().columns)
 
     def post(real_datetime, real_duration):
+
+        print(f"番組タイトル: {jikkyo_channel}【ニコニコ実況】{real_datetime.strftime('%Y年%m月%d日 %H:%M')}～{(real_datetime + real_duration).strftime('%H:%M')}")
+        print(f"番組開始時刻: {real_datetime.strftime('%Y/%m/%d %H:%M:%S')}  " +
+              f"番組終了時刻: {(real_datetime + real_duration).strftime('%Y/%m/%d %H:%M:%S')}")
+        print('-' * shutil.get_terminal_size().columns)
 
         # コミュニティ ID が取得できなかったら終了
         if JKLive.JKLive.getNicoCommunityID(jikkyo_id) == None:
             print(f"生放送の予約に失敗しました。")
             print(f"エラー: 実況チャンネル {jikkyo_id} に該当するニコニコミュニティが見つかりませんでした。")
             print('=' * shutil.get_terminal_size().columns)
-            sys.exit(1)
+            return
 
         # インスタンスを作成
-        jklive = JKLive.JKLive(jikkyo_id, datetime, duration, nicologin_mail, nicologin_password)
+        jklive = JKLive.JKLive(jikkyo_id, real_datetime, real_duration, nicologin_mail, nicologin_password)
 
         # 番組を予約する
         result = jklive.reserve()
@@ -112,7 +127,7 @@ def main():
         # 番組予約の成功/失敗
         if result['meta']['status'] == 201:
             print(f"生放送の予約に成功しました。放送 ID は {result['data']['id']} です。")
-            print(f"URL: [https://live2.nicovideo.jp/watch/{result['data']['id']}]")
+            print(f"URL: https://live2.nicovideo.jp/watch/{result['data']['id']}")
         else:
             print(f"生放送の予約に失敗しました。status: {result['meta']['status']} errorcode: {result['meta']['errorCode']}")
             if 'data' in result:
@@ -120,13 +135,56 @@ def main():
             else:
                 print(f"エラー: {JKLive.JKLive.getReserveErrorMessage(result['meta']['errorCode'])}")
             print('=' * shutil.get_terminal_size().columns)
-            sys.exit(1)
+            return
 
-    # 番組予約を実行
-    post(datetime, duration)
+        # 行区切り
+        print('=' * shutil.get_terminal_size().columns)
 
-    # 行区切り
-    print('=' * shutil.get_terminal_size().columns)
+    # 番組の配信時間の長さが6時間以内
+    if duration_hour <= 6:
+
+        # 番組予約をそのまま実行
+        post(datetime, duration)
+
+    # 番組の配信時間の長さが7時間以上
+    # ユーザー生放送は最長6時間までのため、番組を分割する
+    elif duration_hour > 6:
+
+        # 予約した6時間ごとの番組に合わせてずらす時間
+        seek_datetime = copy.copy(datetime)
+
+        # 残り配信時間
+        duration_hour_count = copy.copy(duration_hour)
+
+        while True:
+
+            # 残り配信時間が7時間以上なら
+            if duration_hour_count > 6:
+
+                # 6時間までの番組を予約
+                post(seek_datetime, dt.timedelta(hours=6))
+
+                # 時間をずらす
+                seek_datetime = seek_datetime + dt.timedelta(hours=6)
+
+                # 残り配信時間を減らす
+                duration_hour_count = duration_hour_count - 6
+
+            # 残り配信時間が6時間以下なら
+            else:
+
+                # 残り配信時間分の長さの番組を予約
+                post(seek_datetime, dt.timedelta(hours=duration_hour_count))
+
+                # 時間をずらす
+                seek_datetime = seek_datetime + dt.timedelta(hours=duration_hour_count)
+
+                # 残り配信時間を減らす
+                duration_hour_count = duration_hour_count - duration_hour_count
+
+            # 残り時間が1時間未満なら終了
+            if duration_hour_count < 1:
+                break
 
 
 if __name__ == '__main__':

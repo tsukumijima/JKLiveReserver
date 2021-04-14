@@ -140,8 +140,7 @@ class JKLive:
             'isAutoCommentFilterEnabled': True,
         }
 
-        import pprint
-        pprint.pprint(payload)
+        #print(payload)
 
         # API にアクセス
         response = requests.post(url, json.dumps(payload), headers=headers).json()
