@@ -46,5 +46,5 @@ Python 3.8 で検証しています。Python 2 系は論外として、3.8 未�
 build.sh を実行すればバイナリを自ビルドできますが、PyInstaller と依存ライブラリ諸々が Windows と WSL 側両方に入っている事が前提のため、他の環境でビルドできるかは微妙です。
 
 ## License
-[MIT License](LICENSE.txt)
+[MIT License](License.txt)
 
