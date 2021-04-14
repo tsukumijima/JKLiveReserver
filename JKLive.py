@@ -49,7 +49,7 @@ class JKLive:
         'COMMUNITY_NOT_FOUND': '指定されたコミュニティが存在しません。',
         'PENALIZED_COMMUNITY': '放送ペナルティを受けたコミュニティでは放送できません。',
         'OVERLAP_COMMUNITY': '同一コミュニティで他に重複した別ユーザの放送の予定があります。',
-        'NOT_PREMIUM_USER': 'プレミアムユーザではありません。',
+        'NOT_PREMIUM_USER': 'プレミアムユーザではないため、番組を予約できません。',
         'PENALIZED_USER': '配信ペナルティを受けています。',
         'OVERLAP_PROGRAM_PROVIDER': '該当時間に別の同ユーザの放送予定があります。',
         'NO_PERMISSION': '許可のない操作が行われました。',

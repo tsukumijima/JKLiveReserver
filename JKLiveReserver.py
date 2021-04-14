@@ -115,7 +115,10 @@ def main():
             print(f"URL: [https://live2.nicovideo.jp/watch/{result['data']['id']}]")
         else:
             print(f"生放送の予約に失敗しました。status: {result['meta']['status']} errorcode: {result['meta']['errorCode']}")
-            print(f"エラー: {JKLive.JKLive.getReserveErrorMessage(result['meta']['errorCode'])}")
+            if 'data' in result:
+                print(f"エラー: {JKLive.JKLive.getReserveErrorMessage(result['meta']['errorCode'])} ({result['data'][0]})")
+            else:
+                print(f"エラー: {JKLive.JKLive.getReserveErrorMessage(result['meta']['errorCode'])}")
             print('=' * shutil.get_terminal_size().columns)
             sys.exit(1)
 
