@@ -36,11 +36,11 @@ def main():
     # 今日もしくは明日の朝4時に設定
     if args.DateTime.rstrip() == 'now':
         # 今日の朝4時はもう過ぎた
-        if now_datetime.replace(hour=4, minute=0, second=0).astimezone() <= now_datetime:
-            datetime = (now_datetime + dt.timedelta(days=1)).replace(hour=4, minute=0, second=0).astimezone()
+        if now_datetime.replace(hour=4, minute=0, second=0, microsecond=0).astimezone() <= now_datetime:
+            datetime = (now_datetime + dt.timedelta(days=1)).replace(hour=4, minute=0, second=0, microsecond=0).astimezone()
         # 今日の朝4時はこれから
-        elif now_datetime.replace(hour=4, minute=0, second=0).astimezone() > now_datetime:
-            datetime = now_datetime.replace(hour=4, minute=0, second=0).astimezone()
+        elif now_datetime.replace(hour=4, minute=0, second=0, microsecond=0).astimezone() > now_datetime:
+            datetime = now_datetime.replace(hour=4, minute=0, second=0, microsecond=0).astimezone()
     # 指定された時刻を設定
     else:
         datetime = dateutil.parser.parse(args.DateTime.rstrip()).astimezone()
