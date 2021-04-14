@@ -57,7 +57,7 @@ class JKLive:
         'SERVICE_ERROR': '一時的なサーバ不調によりリクエストに失敗しました（リトライすると直る可能性もありますし、障害の可能性もあります）。',
     }
 
-    def __init__(self, jikkyo_id, datetime, duration, nicologin_mail, nicologin_password):
+    def __init__(self, jikkyo_id, datetime, length, nicologin_mail, nicologin_password):
 
         # 実況 ID
         self.jikkyo_id = jikkyo_id
@@ -72,7 +72,7 @@ class JKLive:
         self.datetime = datetime
 
         # 予約する番組の長さ
-        self.duration = duration
+        self.length = length
 
         # メールアドレス・パスワード
         self.nicologin_mail = nicologin_mail
@@ -108,14 +108,14 @@ class JKLive:
             # コミュニティID
             'communityId': self.community_id,
             # タイトル
-            'title': f"{self.jikkyo_channel}【ニコニコ実況】{self.datetime.strftime('%Y年%m月%d日 %H:%M')}～{(self.datetime + self.duration).strftime('%H:%M')}",
+            'title': f"{self.jikkyo_channel}【ニコニコ実況】{self.datetime.strftime('%Y年%m月%d日 %H:%M')}～{(self.datetime + self.length).strftime('%H:%M')}",
             # 説明
             'description': 'ニコニコ実況は、放送中のテレビ番組や起きているイベントに対して、みんなでコメントをし盛り上がりを共有する、リアルタイムコミュニケーションサービスです。',
             # 番組開始時刻
             'reservationBeginTime': self.datetime.isoformat(),
             # 番組時間（分単位）
             # 参考: https://qiita.com/ksato9700/items/f8a2ea86c20ac0f34538
-            'durationMinutes': int(self.duration / dt.timedelta(minutes=1)),
+            'durationMinutes': int(self.length / dt.timedelta(minutes=1)),
             # カテゴリ
             'category': '一般(その他)',
             # タグ
