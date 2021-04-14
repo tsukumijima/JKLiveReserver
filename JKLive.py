@@ -108,7 +108,7 @@ class JKLive:
             # コミュニティID
             'communityId': self.community_id,
             # タイトル
-            'title': f"{self.jikkyo_channel}【ニコニコ実況】{self.datetime.strftime('%Y年%m月%d日 %H:%M')}～",
+            'title': f"{self.jikkyo_channel}【ニコニコ実況】{self.datetime.strftime('%Y年%m月%d日 %H:%M')}～{(self.datetime + self.duration).strftime('%H:%M')}",
             # 説明
             'description': 'ニコニコ実況は、放送中のテレビ番組や起きているイベントに対して、みんなでコメントをし盛り上がりを共有する、リアルタイムコミュニケーションサービスです。',
             # 番組開始時刻
