@@ -16,9 +16,7 @@
 
 ## インストール
 
-[ここ](https://github.com/tsukumijima/JKLiveReserver/releases)からダウンロードします。  
-あるいは、GitHub の画面内にある緑色の［Code］ボタンをクリックすると［Download Zip］ボタンが表示されるので、ボタンをクリックしてダウンロードします。
-
+[こちら](https://github.com/tsukumijima/JKLiveReserver/releases) のリリースから、［Source code］をクリックしてダウンロードします。  
 ダウンロードできたら解凍し、適当なフォルダに配置します。
 
 ### 設定
