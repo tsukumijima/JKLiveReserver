@@ -13,7 +13,7 @@ class JKLive:
     # 実況 ID とチャンネル/コミュニティ ID の対照表
     jikkyo_channel_table = {
         'jk1': {'type': 'channel', 'id': 'ch2646436', 'name': 'NHK総合'},
-        'jk2': {'type': 'channel', 'id': 'ch2646437', 'name': 'NHKEテレ'},
+        'jk2': {'type': 'channel', 'id': 'ch2646437', 'name': 'NHK Eテレ'},
         'jk4': {'type': 'channel', 'id': 'ch2646438', 'name': '日本テレビ'},
         'jk5': {'type': 'channel', 'id': 'ch2646439', 'name': 'テレビ朝日'},
         'jk6': {'type': 'channel', 'id': 'ch2646440', 'name': 'TBSテレビ'},
@@ -93,6 +93,7 @@ class JKLive:
             {'label':'テレビ実況', 'isLocked': True},
             {'label':'実況', 'isLocked': True},
             {'label':'雑談', 'isLocked': True},
+            {'label':self.jikkyo_channel.replace(' ', '_'), 'isLocked': True},
         ]
 
         # API に渡すヘッダー
