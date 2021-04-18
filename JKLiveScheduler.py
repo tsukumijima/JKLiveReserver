@@ -159,7 +159,7 @@ def main():
                 <Actions Context="Author">
                     <Exec>
                         <Command>{current_folder}\\JKLiveReserver.exe</Command>
-                        <Arguments>{jikkyo_id}</Arguments>
+                        <Arguments>{jikkyo_id} --output-log</Arguments>
                     </Exec>
                 </Actions>
             </Task>
