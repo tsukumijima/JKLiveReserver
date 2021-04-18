@@ -8,6 +8,10 @@ pwsh.exe -Command pyinstaller JKLiveReserver.py --onefile --exclude-module numpy
 mv dist/JKLiveReserver.exe JKLiveReserver.exe
 chmod a+x JKLiveReserver.exe
 
+pwsh.exe -Command pyinstaller JKLiveScheduler.py --onefile --exclude-module numpy --exclude-module pandas
+mv dist/JKLiveScheduler.exe JKLiveScheduler.exe
+chmod a+x JKLiveScheduler.exe
+
 # Linux 版バイナリをビルド
 pyinstaller JKLiveReserver.py --onefile --exclude-module numpy --exclude-module pandas
 mv dist/JKLiveReserver JKLiveReserver
