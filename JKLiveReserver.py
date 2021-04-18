@@ -31,8 +31,13 @@ def main():
     parser.add_argument('Channel', help='予約する実況チャンネルのID (ex: jk101)')
     parser.add_argument('-d', '--date', default=None, help='予約する番組の開始時刻 (ex: 2021/04/15/04:00)\n省略すると現在時刻以降の朝4時の日付に設定されます')
     parser.add_argument('-l', '--length', default=168, help='予約する番組の配信時間の長さ (ex: 24)\n省略すると 168（7日間）に設定されます\n最大配信時間が6時間までのため、6時間以降は番組を分割して予約します')
+    parser.add_argument('-o', '--output-log', action='store_true', help='ログをファイルに出力するかどうか')
     parser.add_argument('-v', '--version', action='version', help='バージョン情報を表示する', version='JKLiveReserver version ' + __version__)
     args = parser.parse_args()
+
+    if args.output_log is True:  # 標準出力をファイルに変更
+        sys.stdout = open(current_folder + '/JKLiveReserver.log', mode='w', encoding='UTF-8')
+        sys.stderr = open(current_folder + '/JKLiveReserver.log', mode='w', encoding='UTF-8')
 
     # 実況ID
     jikkyo_id = args.Channel.rstrip()
