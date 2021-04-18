@@ -23,6 +23,15 @@ def is_admin():
     except:
         return False
 
+# 参考: https://www.atmarkit.co.jp/ait/articles/2102/09/news026.html
+def is_int(s):
+    try:
+        int(s, 10)
+    except ValueError:
+        return False
+    else:
+        return True
+
 def main():
 
     # 曜日の対照表
@@ -47,7 +56,7 @@ def main():
     print('     削除する場合は 2 を入力してください。')
     while True:
         operation = input('     タスクの操作：')
-        if (int(operation) == 1 or int(operation) == 2):
+        if is_int(operation) and (int(operation) == 1 or int(operation) == 2):
             operation = int(operation)
             break
         else:
