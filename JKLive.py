@@ -164,6 +164,11 @@ class JKLive:
         # 成功/失敗判定は結果を受け取った側で行う
         return response
 
+    # 実況 ID リストを取得
+    @staticmethod
+    def getJikkyoChannelList():
+        return JKLive.jikkyo_channel_table.keys()
+
     # 実況 ID から実況チャンネル名を取得
     @staticmethod
     def getJikkyoChannelName(jikkyo_id):

@@ -12,10 +12,17 @@ import shutil
 import sys
 import time
 
-import JKLive
+from JKLive import JKLive
 
 # バージョン情報
 __version__ = '3.0.0'
+
+# このファイルが存在するフォルダの絶対パス
+current_folder = os.path.dirname(os.path.abspath(sys.argv[0]))
+
+# ターミナルの横幅
+# conhost.exe だと -1px しないと改行されてしまう
+terminal_columns = shutil.get_terminal_size().columns - 1
 
 def main():
 
@@ -52,34 +59,34 @@ def main():
     length_hour = int(args.length)
 
     # 行区切り
-    print('=' * shutil.get_terminal_size().columns)
+    print('=' * terminal_columns)
 
     # 予約可能期間外かチェック
     if datetime > max_datetime:
         print(f"生放送の予約に失敗しました。")
         print(f"エラー: {datetime.strftime('%Y/%m/%d %H:%M')} は予約可能時間外のため予約できません。予約可能な期間は予約日から1週間です。")
-        print('=' * shutil.get_terminal_size().columns)
+        print('=' * terminal_columns)
         sys.exit(1)
     if datetime < now_datetime:
         print(f"生放送の予約に失敗しました。")
         print(f"エラー: {datetime.strftime('%Y/%m/%d %H:%M')} はすでに過ぎた日付です。予約可能な期間は予約日から1週間です。")
-        print('=' * shutil.get_terminal_size().columns)
+        print('=' * terminal_columns)
         sys.exit(1)
     if length_hour > 168 or length_hour < 1 :
         print(f"生放送の予約に失敗しました。")
         print(f"エラー: 予約する番組の配信時間が不正です。")
-        print('=' * shutil.get_terminal_size().columns)
+        print('=' * terminal_columns)
         sys.exit(1)
 
     # コミュニティ ID が取得できなかったら終了
-    if JKLive.JKLive.getNicoCommunityID(jikkyo_id) == None:
+    if JKLive.getNicoCommunityID(jikkyo_id) == None:
         print(f"生放送の予約に失敗しました。")
         print(f"エラー: 実況チャンネル {jikkyo_id} に該当するニコニコミュニティが見つかりませんでした。")
-        print('=' * shutil.get_terminal_size().columns)
+        print('=' * terminal_columns)
         sys.exit(1)
 
     # ニコ生がメンテナンス中やサーバーエラーでないかを確認
-    nicolive_status, nicolive_status_code = JKLive.JKLive.getNicoLiveStatus()
+    nicolive_status, nicolive_status_code = JKLive.getNicoLiveStatus()
     if nicolive_status is False:
         print(f"生放送の予約に失敗しました。")
         if nicolive_status_code == 500:
@@ -88,15 +95,15 @@ def main():
             print('エラー: 現在、ニコ生はメンテナンス中です。(HTTP Error 503)')
         else:
             print(f"エラー: 現在、ニコ生でエラーが発生しています。(HTTP Error {nicolive_status_code})")
-        print('=' * shutil.get_terminal_size().columns)
+        print('=' * terminal_columns)
         sys.exit(1)
 
     # 設定読み込み
-    config_ini = os.path.dirname(os.path.abspath(sys.argv[0])) + '/JKLiveReserver.ini'
+    config_ini = current_folder + '/JKLiveReserver.ini'
     if not os.path.exists(config_ini):
         print(f"生放送の予約に失敗しました。")
         print('エラー: JKLiveReserver.ini が存在しません。JKLiveReserver.example.ini からコピーし、\n適宜設定を変更して JKLiveReserver と同じ場所に配置してください。')
-        print('=' * shutil.get_terminal_size().columns)
+        print('=' * terminal_columns)
         sys.exit(1)
     config = configparser.ConfigParser()
     config.read(config_ini, encoding='UTF-8')
@@ -106,7 +113,7 @@ def main():
     nicologin_password = config.get('Default', 'nicologin_password')
 
     # 実況チャンネル名
-    jikkyo_channel = JKLive.JKLive.getJikkyoChannelName(jikkyo_id)
+    jikkyo_channel = JKLive.getJikkyoChannelName(jikkyo_id)
 
     print(f"{jikkyo_channel} の実況番組を " +
         f"{datetime.strftime('%Y/%m/%d %H:%M')} から {(datetime + length).strftime('%Y/%m/%d %H:%M')} まで予約します。")
@@ -117,9 +124,9 @@ def main():
         time.sleep(0.5)
 
         # インスタンスを作成
-        jklive = JKLive.JKLive(jikkyo_id, real_datetime, real_length, nicologin_mail, nicologin_password)
+        jklive = JKLive(jikkyo_id, real_datetime, real_length, nicologin_mail, nicologin_password)
 
-        print('-' * shutil.get_terminal_size().columns)
+        print('-' * terminal_columns)
         print(f"番組タイトル: {jklive.generateTitle()}")
         print(f"番組開始時刻: {real_datetime.strftime('%Y/%m/%d %H:%M:%S')}  " +
               f"番組終了時刻: {(real_datetime + real_length).strftime('%Y/%m/%d %H:%M:%S')}")
@@ -134,9 +141,9 @@ def main():
         else:
             print(f"生放送の予約に失敗しました。status: {result['meta']['status']} errorcode: {result['meta']['errorCode']}")
             if 'data' in result:
-                print(f"エラー: {JKLive.JKLive.getReserveErrorMessage(result['meta']['errorCode'])} ({result['data'][0]})")
+                print(f"エラー: {JKLive.getReserveErrorMessage(result['meta']['errorCode'])} ({result['data'][0]})")
             else:
-                print(f"エラー: {JKLive.JKLive.getReserveErrorMessage(result['meta']['errorCode'])}")
+                print(f"エラー: {JKLive.getReserveErrorMessage(result['meta']['errorCode'])}")
             return
 
     # 番組の配信時間の長さが6時間以内
@@ -186,7 +193,7 @@ def main():
                 break
 
     # 行区切り
-    print('=' * shutil.get_terminal_size().columns)
+    print('=' * terminal_columns)
 
 
 if __name__ == '__main__':
