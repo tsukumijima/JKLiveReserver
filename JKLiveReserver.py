@@ -31,7 +31,7 @@ def main():
     parser.add_argument('Channel', help='予約する実況チャンネルのID (ex: jk101)')
     parser.add_argument('-d', '--date', default=None, help='予約する番組の開始時刻 (ex: 2021/04/15/04:00)\n省略すると現在時刻以降の朝4時の日付に設定されます')
     parser.add_argument('-l', '--length', default=168, help='予約する番組の配信時間の長さ (ex: 24)\n省略すると 168（7日間）に設定されます\n最大配信時間が6時間までのため、6時間以降は番組を分割して予約します')
-    parser.add_argument('-o', '--output-log', action='store_true', help='ログをファイルに出力するかどうか')
+    parser.add_argument('-o', '--output-log', action='store_true', help='実行ログをファイルに出力するかどうか')
     parser.add_argument('-v', '--version', action='version', help='バージョン情報を表示する', version='JKLiveReserver version ' + __version__)
     args = parser.parse_args()
 
@@ -68,24 +68,24 @@ def main():
 
     # 予約可能期間外かチェック
     if datetime > max_datetime:
-        print(f"生放送の予約に失敗しました。")
+        print(f"番組の予約に失敗しました。")
         print(f"エラー: {datetime.strftime('%Y/%m/%d %H:%M')} は予約可能時間外のため予約できません。予約可能な期間は予約日から1週間です。")
         print('=' * terminal_columns)
         sys.exit(1)
     if datetime < now_datetime:
-        print(f"生放送の予約に失敗しました。")
+        print(f"番組の予約に失敗しました。")
         print(f"エラー: {datetime.strftime('%Y/%m/%d %H:%M')} はすでに過ぎた日付です。予約可能な期間は予約日から1週間です。")
         print('=' * terminal_columns)
         sys.exit(1)
     if length_hour > 168 or length_hour < 1 :
-        print(f"生放送の予約に失敗しました。")
+        print(f"番組の予約に失敗しました。")
         print(f"エラー: 予約する番組の配信時間が不正です。")
         print('=' * terminal_columns)
         sys.exit(1)
 
     # コミュニティ ID が取得できなかったら終了
     if JKLive.getNicoCommunityID(jikkyo_id) == None:
-        print(f"生放送の予約に失敗しました。")
+        print(f"番組の予約に失敗しました。")
         print(f"エラー: 実況チャンネル {jikkyo_id} に該当するニコニコミュニティが見つかりませんでした。")
         print('=' * terminal_columns)
         sys.exit(1)
@@ -93,7 +93,7 @@ def main():
     # ニコ生がメンテナンス中やサーバーエラーでないかを確認
     nicolive_status, nicolive_status_code = JKLive.getNicoLiveStatus()
     if nicolive_status is False:
-        print(f"生放送の予約に失敗しました。")
+        print(f"番組の予約に失敗しました。")
         if nicolive_status_code == 500:
             print('エラー: 現在、ニコ生で障害が発生しています。(HTTP Error 500)')
         elif nicolive_status_code == 503:
@@ -106,7 +106,7 @@ def main():
     # 設定読み込み
     config_ini = current_folder + '/JKLiveReserver.ini'
     if not os.path.exists(config_ini):
-        print(f"生放送の予約に失敗しました。")
+        print(f"番組の予約に失敗しました。")
         print('エラー: JKLiveReserver.ini が存在しません。JKLiveReserver.example.ini からコピーし、\n適宜設定を変更して JKLiveReserver と同じ場所に配置してください。')
         print('=' * terminal_columns)
         sys.exit(1)
@@ -141,10 +141,10 @@ def main():
 
         # 番組予約の成功/失敗
         if result['meta']['status'] == 201:
-            print(f"生放送の予約に成功しました。放送 ID は {result['data']['id']} です。")
+            print(f"番組の予約に成功しました。放送 ID は {result['data']['id']} です。")
             print(f"URL: https://live.nicovideo.jp/watch/{result['data']['id']}")
         else:
-            print(f"生放送の予約に失敗しました。status: {result['meta']['status']} errorcode: {result['meta']['errorCode']}")
+            print(f"番組の予約に失敗しました。status: {result['meta']['status']} errorcode: {result['meta']['errorCode']}")
             if 'data' in result:
                 print(f"エラー: {JKLive.getReserveErrorMessage(result['meta']['errorCode'])} ({result['data'][0]})")
             else:
@@ -158,7 +158,7 @@ def main():
         post(datetime, length)
 
     # 番組の配信時間の長さが7時間以上
-    # ユーザー生放送は最長6時間までのため、番組を分割する
+    # ユーザー番組は最長6時間までのため、番組を分割する
     elif length_hour > 6:
 
         # 予約した6時間ごとの番組に合わせてずらす時間
@@ -197,7 +197,9 @@ def main():
             if length_hour_count < 1:
                 break
 
-    # 行区切り
+
+    print('-' * terminal_columns)
+    print(f"番組の予約を終了しました。")
     print('=' * terminal_columns)
 
 
