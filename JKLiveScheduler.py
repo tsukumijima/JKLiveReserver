@@ -53,10 +53,10 @@ def main():
     print('-' * terminal_columns)
 
     print('  1. タスクを登録・変更する場合は 1 を、')
-    print('     削除する場合は 2 を入力してください。')
+    print('     今すぐ実行する場合は 2 を、削除する場合は 3 を入力してください。')
     while True:
         operation = input('     タスクの操作：')
-        if is_int(operation) and (int(operation) == 1 or int(operation) == 2):
+        if is_int(operation) and (int(operation) == 1 or int(operation) == 2 or int(operation) == 3):
             operation = int(operation)
             break
         else:
@@ -191,8 +191,20 @@ def main():
         # XML を削除
         os.unlink(xml_file)
 
-    # タスクの削除
+    # タスクの実行
     elif operation == 2:
+
+        # schtasks /Run を実行
+        process = subprocess.run(f"schtasks /Run /TN \\JKLiveReserver", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if process.returncode == 0:
+            print('  タスクの実行に成功しました。タスクはバックグラウンドで実行中です。')
+            print('  実行ログは JKLiveReserver.log に出力されます。')
+            print('  しばらく経ったら実行ログを開き、正しく実行できているか確認してください。')
+        else:
+            print('  タスクの実行に失敗しました。タスクが存在しない可能性があります。')
+
+    # タスクの削除
+    elif operation == 3:
 
         # schtasks /Delete を実行
         process = subprocess.run(f"schtasks /Delete /F /TN \\JKLiveReserver", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
