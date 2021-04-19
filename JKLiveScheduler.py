@@ -48,7 +48,7 @@ def main():
     print('=' * terminal_columns)
     print('  ***** JKLiveScheduler *****')
     print('=' * terminal_columns)
-    print('  毎週、指定された曜日に１週間分の実況枠を一括で予約するよう、')
+    print('  毎週、指定された曜日と時間に１週間分の実況枠を一括で予約するよう、')
     print('  タスクスケジューラにタスクを登録するスクリプトです。')
     print('-' * terminal_columns)
 
@@ -121,12 +121,13 @@ def main():
         subprocess.run(f"schtasks /Delete /F /TN \\JKLiveReserver", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         # schtasks に登録する用の XML を錬成する
-        # encoding は UTF-16 のままで OK
-        xml = f"""<?xml version="1.0" encoding="UTF-16"?>
+        xml = \
+        f"""<?xml version="1.0" encoding="UTF-16"?>
             <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
                 <RegistrationInfo>
                     <Date>2021-04-01T00:00:00</Date>
                     <URI>\\JKLiveReserver</URI>
+                    <Description>毎週、指定された曜日と時間に１週間分の実況枠を一括で予約するタスクです。</Description>
                 </RegistrationInfo>
                 <Triggers>
                     <CalendarTrigger>
@@ -176,12 +177,12 @@ def main():
 
         # XML を一時的に出力
         xml_file = current_folder + '/JKLiveReserver.xml'
-        f = open(xml_file, 'w', encoding='UTF-8')
+        f = open(xml_file, 'w', encoding='UTF-16')
         f.write(xml)
         f.close()
 
         # schtasks /Create を実行
-        process = subprocess.run(f"schtasks /Create /F /TN \\JKLiveReserver /XML {xml_file}", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        process = subprocess.run(f"schtasks /Create /F /TN \\JKLiveReserver /XML \"{xml_file}\"", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         if process.returncode == 0:
             print('  タスクの登録に成功しました。')
         else:
@@ -213,9 +214,9 @@ if __name__ == '__main__':
         # OS が Windows で管理者権限がないなら、gsudo で管理者権限で再実行する
         gsudo_exe = os.path.dirname(os.path.abspath(sys.argv[0])) + '/gsudo.exe'
         if '.exe' in sys.argv[0]:  # PyInstaller で exe 化した場合のみ
-            gsudo_cmd = f"{gsudo_exe} {sys.executable} {' '.join(sys.argv[1:])}"
+            gsudo_cmd = f"\"{gsudo_exe}\" \"{sys.executable}\" {' '.join(sys.argv[1:])}"
         else:  # 通常
-            gsudo_cmd = f"{gsudo_exe} {sys.executable} {' '.join(sys.argv)}"
+            gsudo_cmd = f"\"{gsudo_exe}\" \"{sys.executable}\" {' '.join(sys.argv)}"
         # subprocess.run() で実行
         subprocess.run(gsudo_cmd)
     else:
