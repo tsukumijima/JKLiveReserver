@@ -55,7 +55,8 @@ def main():
     # 設定ファイルの存在確認
     config_ini = current_folder + '/JKLiveReserver.ini'
     if not os.path.exists(config_ini):
-        print('  JKLiveReserver.ini が存在しません。JKLiveReserver.example.ini からコピーし、\n適宜設定を変更して JKLiveReserver と同じ場所に配置してください。')
+        print('  JKLiveReserver.ini が存在しません。JKLiveReserver.example.ini からコピーし、')
+        print('  適宜設定を変更して JKLiveReserver と同じ場所に配置してください。')
         input('  終了するには何かキーを入力してください：')
         print('=' * terminal_columns)
         sys.exit(1)
@@ -107,7 +108,7 @@ def main():
         print('-' * terminal_columns)
 
         print('  4. 実況枠を予約する時間を入力してください。')
-        print('     時間は 18:30 のように入力します。')
+        print('     時間は 09:15・13:00・21:30 のように入力します。')
         while True:
             time = input('     実況枠を予約する時間：')
             flg = False
@@ -190,7 +191,7 @@ def main():
         f.close()
 
         # schtasks /Create を実行
-        process = subprocess.run(f"schtasks /Create /F /TN \\JKLiveReserver /XML \"{xml_file}\"", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        process = subprocess.run(f"schtasks /Create /F /TN \\JKLiveReserver /XML \"{xml_file}\"", stdout=subprocess.DEVNULL)
         if process.returncode == 0:
             print('  タスクの登録に成功しました。')
         else:

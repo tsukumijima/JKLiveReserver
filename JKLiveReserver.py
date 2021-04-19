@@ -107,7 +107,8 @@ def main():
     config_ini = current_folder + '/JKLiveReserver.ini'
     if not os.path.exists(config_ini):
         print(f"番組の予約に失敗しました。")
-        print('エラー: JKLiveReserver.ini が存在しません。JKLiveReserver.example.ini からコピーし、\n適宜設定を変更して JKLiveReserver と同じ場所に配置してください。')
+        print('エラー: JKLiveReserver.ini が存在しません。JKLiveReserver.example.ini からコピーし、')
+        print('適宜設定を変更して JKLiveReserver と同じ場所に配置してください。')
         print('=' * terminal_columns)
         sys.exit(1)
     config = configparser.ConfigParser()
