@@ -56,6 +56,7 @@ def main():
     config_ini = current_folder + '/JKLiveReserver.ini'
     if not os.path.exists(config_ini):
         print('  JKLiveReserver.ini が存在しません。JKLiveReserver.example.ini からコピーし、\n適宜設定を変更して JKLiveReserver と同じ場所に配置してください。')
+        input('  終了するには何かキーを入力してください：')
         print('=' * terminal_columns)
         sys.exit(1)
 
