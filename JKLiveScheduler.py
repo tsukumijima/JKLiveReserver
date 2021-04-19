@@ -49,8 +49,15 @@ def main():
     print('  ***** JKLiveScheduler *****')
     print('=' * terminal_columns)
     print('  毎週、指定された曜日と時間に１週間分の実況枠を一括で予約するよう、')
-    print('  タスクスケジューラにタスクを登録するスクリプトです。')
+    print('  タスクスケジューラにタスクを登録するツールです。')
     print('-' * terminal_columns)
+
+    # 設定ファイルの存在確認
+    config_ini = current_folder + '/JKLiveReserver.ini'
+    if not os.path.exists(config_ini):
+        print('  JKLiveReserver.ini が存在しません。JKLiveReserver.example.ini からコピーし、\n適宜設定を変更して JKLiveReserver と同じ場所に配置してください。')
+        print('=' * terminal_columns)
+        sys.exit(1)
 
     print('  1. タスクを登録・変更する場合は 1 を、')
     print('     今すぐ実行する場合は 2 を、削除する場合は 3 を入力してください。')
@@ -235,5 +242,5 @@ if __name__ == '__main__':
         print('=' * terminal_columns)
         print('  ***** JKLiveScheduler *****')
         print('=' * terminal_columns)
-        print('  このスクリプトは Windows 以外では実行できません。')
+        print('  このツールは Windows 以外では実行できません。')
         print('=' * terminal_columns)
