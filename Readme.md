@@ -59,10 +59,16 @@ Linux でも実行できます。上級者向けなので細かい説明は省�
 
 ## インストール
 
+<img width="650" src="https://user-images.githubusercontent.com/39271166/115256891-972f5900-a16a-11eb-8484-6094549a1654.png">
+
 [こちら](https://github.com/tsukumijima/JKLiveReserver/releases) のリリースから、［Source code (zip)］をクリックして Zip ファイルをダウンロードします。  
 ダウンロードできたら解凍し、適当なフォルダに配置します。なお、`C:\Program Files` 以下のフォルダに配置するのは避けてください。
 
+いろいろファイルがありますが、実際に触ることになるのは基本的に `JKLiveReserver.exe` (Windows) `JKLiveReserver` (Linux)・`JKLiveReserver.example.ini`・`JKLiveScheduler.exe` の 4 つだけです。
+
 ### 設定
+
+<img width="650" src="https://user-images.githubusercontent.com/39271166/115255773-8df1bc80-a169-11eb-9029-8c4ff5b7461e.png">
 
 JKLiveReserver を使う前には設定が必要です。まずは `JKLiveReserver.example.ini` を `JKLiveReserver.ini` へコピーしましょう。
 
