@@ -249,10 +249,7 @@ class JKLive:
                 description += '<b>地デジ</b><br>'
             if jikkyo_id == 'jk101':
                 description += '<br>'
-                description += '<b>BS</b><br>'
-            if jikkyo_id == 'jk236':
-                description += '<br>'
-                description += '<b>CS</b><br>'
+                description += '<b>BS・CS</b><br>'
 
             # 現在のチャンネルの情報を追記していく
             description += f"{jikkyo_channel['name']}：{jikkyo_channel['id']} ({jikkyo_id})<br>"
