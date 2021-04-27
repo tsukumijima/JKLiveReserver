@@ -62,7 +62,7 @@ Linux でも実行できます。上級者向けなので細かい説明は省�
 <img width="650" src="https://user-images.githubusercontent.com/39271166/115256891-972f5900-a16a-11eb-8484-6094549a1654.png">
 
 [こちら](https://github.com/tsukumijima/JKLiveReserver/releases) のリリースから、［Source code (zip)］をクリックして Zip ファイルをダウンロードします。  
-ダウンロードできたら解凍し、適当なフォルダに配置します。なお、`C:\Program Files` 以下のフォルダに配置するのは避けてください。
+ダウンロードできたら解凍し、好きなフォルダに配置します。なお、`C:\Program Files` 以下のフォルダに配置するのは避けてください。
 
 いろいろファイルがありますが、実際に触ることになるのは基本的に `JKLiveReserver.exe` (Windows) `JKLiveReserver` (Linux)・`JKLiveReserver.example.ini`・`JKLiveScheduler.exe` の 4 つだけです。
 
@@ -102,6 +102,8 @@ JKLiveReserver は Python スクリプトですが、わざわざ Python の実�
 
 一番簡単な使い方です。よくわからない方はまずはこの使い方で試してみてください。  
 一度 JKLiveScheduler で登録してしまえば、あとは指定した曜日の時間に PC を起動しておきさえすれば、**毎週全自動で指定した実況チャンネルの1週間分の実況枠が予約されます。**
+
+`JKLiveScheduler.exe` をダブルクリックします。「このアプリがデバイスに変更を加えることを許可しますか？」というダイヤログが表示されるので [はい] をクリックすると、以下の画像のように JKLiveScheduler の黒いウインドウが開きます。
 
 #### 1. タスクの登録・変更
 
