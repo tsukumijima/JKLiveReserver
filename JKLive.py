@@ -3,7 +3,6 @@ import datetime as dt
 import json
 import os
 import pickle
-from pprint import pprint
 import requests
 import sys
 
@@ -95,17 +94,17 @@ class JKLive:
 
         # タグ
         tags = [
-            {'label':'ニコニコ実況', 'isLocked': True},
-            {'label':'テレビ実況', 'isLocked': True},
-            {'label':'実況', 'isLocked': True},
-            {'label':'雑談', 'isLocked': True},
-            {'label':self.jikkyo_channel.replace(' ', '_'), 'isLocked': True},
+            {'label': 'ニコニコ実況', 'isLocked': True},
+            {'label': 'テレビ実況', 'isLocked': True},
+            {'label': '実況', 'isLocked': True},
+            {'label': '雑談', 'isLocked': True},
+            {'label': self.jikkyo_channel.replace(' ', '_'), 'isLocked': True},
         ]
 
         # API に渡すヘッダー
         headers = {
-            'X-niconico-session' : user_session,
-            'Accept' : 'application/json',
+            'X-niconico-session': user_session,
+            'Accept': 'application/json',
             'Content-Type': 'application/json',
         }
 
@@ -146,8 +145,6 @@ class JKLive:
             'isAutoCommentFilterEnabled': True,
         }
 
-        #print(payload)
-
         # API にアクセス
         response = requests.post(url, json.dumps(payload), headers=headers).json()
 
@@ -158,7 +155,7 @@ class JKLive:
             user_session = self.__login(True)
 
             # もう一度 API にアクセス
-            response = requests.post(url, json.dumps(payload), headers = headers).json()
+            response = requests.post(url, json.dumps(payload), headers=headers).json()
 
         # レスポンスを返す
         # 成功/失敗判定は結果を受け取った側で行う

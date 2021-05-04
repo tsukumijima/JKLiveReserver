@@ -5,9 +5,7 @@ import configparser
 import copy
 import datetime as dt
 import dateutil.parser
-import json
 import os
-from pprint import pprint
 import shutil
 import sys
 import time
@@ -24,10 +22,11 @@ current_folder = os.path.dirname(os.path.abspath(sys.argv[0]))
 # conhost.exe だと -1px しないと改行されてしまう
 terminal_columns = shutil.get_terminal_size().columns - 1
 
+
 def main():
 
     # 引数解析
-    parser = argparse.ArgumentParser(description = 'ニコニコ実況用のコミュニティ番組を一括で予約（枠取り）するツール', formatter_class = argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description='ニコニコ実況用のコミュニティ番組を一括で予約（枠取り）するツール', formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('Channel', help='予約する実況チャンネルのID (ex: jk101)')
     parser.add_argument('-d', '--date', default=None, help='予約する番組の開始時刻 (ex: 2021/04/15/04:00)\n省略すると現在時刻以降の朝4時の日付に設定されます')
     parser.add_argument('-l', '--length', default=168, help='予約する番組の配信時間の長さ (時間単位) (ex: 24)\n省略すると 168（7日間）に設定されます\n最大配信時間が6時間までのため、6時間以降は番組を分割して予約します')
@@ -77,14 +76,14 @@ def main():
         print(f"エラー: {datetime.strftime('%Y/%m/%d %H:%M')} はすでに過ぎた日付です。予約可能な期間は予約日から1週間です。")
         print('=' * terminal_columns)
         sys.exit(1)
-    if length_hour > 168 or length_hour < 1 :
+    if length_hour > 168 or length_hour < 1:
         print(f"番組の予約に失敗しました。")
         print(f"エラー: 予約する番組の配信時間が不正です。")
         print('=' * terminal_columns)
         sys.exit(1)
 
     # コミュニティ ID が取得できなかったら終了
-    if JKLive.getNicoCommunityID(jikkyo_id) == None:
+    if JKLive.getNicoCommunityID(jikkyo_id) is None:
         print(f"番組の予約に失敗しました。")
         print(f"エラー: 実況チャンネル {jikkyo_id} に該当するニコニコミュニティが見つかりませんでした。")
         print('=' * terminal_columns)
@@ -122,7 +121,7 @@ def main():
     jikkyo_channel = JKLive.getJikkyoChannelName(jikkyo_id)
 
     print(f"{jikkyo_channel} の実況番組を " +
-        f"{datetime.strftime('%Y/%m/%d %H:%M')} から {(datetime + length).strftime('%Y/%m/%d %H:%M')} まで予約します。")
+          f"{datetime.strftime('%Y/%m/%d %H:%M')} から {(datetime + length).strftime('%Y/%m/%d %H:%M')} まで予約します。")
 
     def post(real_datetime, real_length):
 
@@ -197,7 +196,6 @@ def main():
             # 残り時間が1時間未満なら終了
             if length_hour_count < 1:
                 break
-
 
     print('-' * terminal_columns)
     print(f"番組の予約を終了しました。")

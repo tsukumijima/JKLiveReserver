@@ -16,12 +16,14 @@ current_folder = os.path.dirname(os.path.abspath(sys.argv[0]))
 # conhost.exe だと -1px しないと改行されてしまう
 terminal_columns = shutil.get_terminal_size().columns - 1
 
+
 # 参考: https://stackoverflow.com/questions/130763/request-uac-elevation-from-within-a-python-script
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
-    except:
+    except Exception:
         return False
+
 
 # 参考: https://www.atmarkit.co.jp/ait/articles/2102/09/news026.html
 def is_int(s):
@@ -31,6 +33,7 @@ def is_int(s):
         return False
     else:
         return True
+
 
 def main():
 
