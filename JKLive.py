@@ -56,7 +56,7 @@ class JKLive:
         'SERVICE_ERROR': '一時的なサーバ不調によりリクエストに失敗しました（リトライすると直る可能性もありますし、障害の可能性もあります）。',
     }
 
-    def __init__(self, jikkyo_id, datetime, length, nicologin_mail, nicologin_password):
+    def __init__(self, jikkyo_id, datetime, length, nicologin_mail, nicologin_password, autorun_weekly=False, autorun_daily=False):
 
         # 実況 ID
         self.jikkyo_id = jikkyo_id
@@ -73,6 +73,10 @@ class JKLive:
         # 予約する番組の長さ
         self.length = length
 
+        # タスクスケジューラなどからの自動実行かどうか
+        self.autorun_weekly = autorun_weekly  # 毎週
+        self.autorun_daily = autorun_daily  # 毎日
+
         # メールアドレス・パスワード
         self.nicologin_mail = nicologin_mail
         self.nicologin_password = nicologin_password
@@ -81,7 +85,7 @@ class JKLive:
     def reserve(self):
 
         # API の URL
-        url = 'http://live2.nicovideo.jp/unama/api/v2/programs'
+        url = 'https://live2.nicovideo.jp/unama/api/v2/programs'
 
         # ログインセッションを取得
         user_session = self.__login()
@@ -237,6 +241,12 @@ class JKLive:
     def generateDescription(self):
 
         description = 'ニコニコ実況は、放送中のテレビ番組や起きているイベントに対して、みんなでコメントをし盛り上がりを共有する、リアルタイムコミュニケーションサービスです。<br>'
+        if self.autorun_weekly is True:  # 毎週自動実行
+            description += f"この実況枠は JKLiveReserver https://git.io/JOGdT によって毎週{self.datetime.strftime('%a')}曜日に1週間分自動で一括予約されています。<br>"
+        elif self.autorun_daily is True:  # 毎日自動実行
+            description += f"この実況枠は JKLiveReserver https://git.io/JOGdT によって毎日自動で一括予約されています。<br>"
+        else:  # それ以外
+            description += f"この実況枠は JKLiveReserver https://git.io/JOGdT によって自動で一括予約されています。<br>"
         description += '<br>'
 
         for jikkyo_id, jikkyo_channel in self.jikkyo_channel_table.items():
@@ -250,8 +260,5 @@ class JKLive:
 
             # 現在のチャンネルの情報を追記していく
             description += f"{jikkyo_channel['name']}：{jikkyo_channel['id']} ({jikkyo_id})<br>"
-
-        description += '<br>'
-        description += 'この実況枠は JKLiveReserver（https://git.io/JOGdT）によって自動登録されています。<br>'
 
         return description

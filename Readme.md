@@ -227,7 +227,7 @@ Crontab の編集方法とかまでは説明しません。だいたい Linux �
 あとは、お好きな方法で Crontab に登録するだけです。
 
 ```
-30 21 * * WED /path/to/JKLiveReserver/JKLiveReserver jk141 --output-log
+30 21 * * WED /path/to/JKLiveReserver/JKLiveReserver jk141 --autorun-weekly --output-log
 ```
 
 #### 解説
@@ -243,7 +243,10 @@ Crontab の編集方法とかまでは説明しません。だいたい Linux �
    - JKLiveReserver を実行したいので、JKLiveReserver バイナリのあるパスを指定します。
    - `/path/to/` の部分は適宜書き換えてください（分かっているとは思いますが）。
 7. 実行する引数が入ります。
-   - BS日テレの実況枠を取りたいので、`jk141 --output-log` を指定します。
+   - BS日テレの実況枠を取りたいので、`jk141 --autorun-weekly --output-log` を指定します。
+   - `--autorun-weekly` オプションは毎週自動実行されているかどうかを JKLiveReserver に渡すためのオプションです。
+     - 指定すると、予約した番組の説明欄に毎週指定された曜日（今回の場合は水曜日）に一括予約している旨を追記します。
+     - 毎日自動実行されているかどうかを JKLiveReserver に渡す `--autorun-daily` オプションもあります。
    - `--output-log` オプションは実行ログを標準出力ではなく、JKLiveReserver バイナリと同じディレクトリの `JKLiveReserver.log` に書き出すオプションです。
      - JKLiveReserver ディレクトリへの書き込み権限がないとおそらく動作しません。
 
@@ -272,6 +275,10 @@ usage: JKLiveReserver [-h] [-d DATE] [-l LENGTH] [-o] [-v] Channel
                         予約する番組の配信時間の長さ (時間単位) (ex: 24)
                         省略すると 168（7日間）に設定されます
                         最大配信時間が6時間までのため、6時間以降は番組を分割して予約します
+  -aw, --autorun-weekly タスクスケジューラなどからの自動実行かどうか（毎週）
+                        指定すると予約した番組の説明欄に毎週指定された曜日に自動で一括予約している旨を追記します
+  -ad, --autorun-daily  タスクスケジューラなどからの自動実行かどうか（毎日）
+                        指定すると予約した番組の説明欄に毎日自動で一括予約している旨を追記します
   -o, --output-log      実行ログをファイルに出力するかどうか
   -v, --version         バージョン情報を表示する
 ```
@@ -296,7 +303,7 @@ usage: JKLiveReserver [-h] [-d DATE] [-l LENGTH] [-o] [-v] Channel
 
 別途 PowerShell やバッチファイル、Linux の場合はシェルスクリプトなどを使い、毎日 22:00 から 23:00 までだけ予約する、といった高度な事もできると思います。
 
-大方不具合は直したつもりですが、もし不具合を見つけられた場合は [Issues](https://github.com/tsukumijima/JKLiveReserver/issues) までお願いします。
+大方不具合は直したつもりですが、もし不具合を見つけられた場合は前述の Discord か [Issues](https://github.com/tsukumijima/JKLiveReserver/issues) までお願いします。
 
 ## License
 [MIT License](License.txt)

@@ -1,10 +1,11 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import argparse
 import configparser
 import copy
 import datetime as dt
 import dateutil.parser
+import locale
 import os
 import shutil
 import sys
@@ -25,16 +26,26 @@ terminal_columns = shutil.get_terminal_size().columns - 1
 
 def main():
 
+    # locale モジュールで時間のロケールを ja_JP.UTF-8 に変更する
+    locale.setlocale(locale.LC_TIME, 'ja_JP.UTF-8')
+
     # 引数解析
     parser = argparse.ArgumentParser(description='ニコニコ実況用のコミュニティ番組を一括で予約（枠取り）するツール', formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('Channel', help='予約する実況チャンネルのID (ex: jk101)')
     parser.add_argument('-d', '--date', default=None, help='予約する番組の開始時刻 (ex: 2021/04/15/04:00)\n省略すると現在時刻以降の朝4時の日付に設定されます')
     parser.add_argument('-l', '--length', default=168, help='予約する番組の配信時間の長さ (時間単位) (ex: 24)\n省略すると 168（7日間）に設定されます\n最大配信時間が6時間までのため、6時間以降は番組を分割して予約します')
     parser.add_argument('-o', '--output-log', action='store_true', help='実行ログをファイルに出力するかどうか')
+    parser.add_argument('-aw', '--autorun-weekly', action='store_true', help='タスクスケジューラなどからの自動実行かどうか（毎週）\n指定すると予約した番組の説明欄に毎週指定された曜日に自動で一括予約している旨を追記します')
+    parser.add_argument('-ad', '--autorun-daily', action='store_true', help='タスクスケジューラなどからの自動実行かどうか（毎日）\n指定すると予約した番組の説明欄に毎日自動で一括予約している旨を追記します')
     parser.add_argument('-v', '--version', action='version', help='バージョン情報を表示する', version='JKLiveReserver version ' + __version__)
     args = parser.parse_args()
 
-    if args.output_log is True:  # 標準出力をファイルに変更
+    # タスクスケジューラなどからの自動実行かどうか
+    autorun_weekly = args.autorun_weekly  # 毎週
+    autorun_daily = args.autorun_daily  # 毎日
+
+    # 標準出力をファイルに変更
+    if args.output_log is True:
         sys.stdout = open(current_folder + '/JKLiveReserver.log', mode='w', encoding='UTF-8')
         sys.stderr = open(current_folder + '/JKLiveReserver.log', mode='w', encoding='UTF-8')
 
@@ -129,7 +140,7 @@ def main():
         time.sleep(0.5)
 
         # インスタンスを作成
-        jklive = JKLive(jikkyo_id, real_datetime, real_length, nicologin_mail, nicologin_password)
+        jklive = JKLive(jikkyo_id, real_datetime, real_length, nicologin_mail, nicologin_password, autorun_weekly, autorun_daily)
 
         print('-' * terminal_columns)
         print(f"番組タイトル: {jklive.generateTitle()}")
