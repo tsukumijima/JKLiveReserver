@@ -128,6 +128,26 @@ def main():
     nicologin_mail = config.get('Default', 'nicologin_mail')
     nicologin_password = config.get('Default', 'nicologin_password')
 
+    # 予約する番組でAIコメントフィルターを有効にするか
+    try:
+        commentfilter_enabled = config.get('Default', 'commentfilter_enabled')
+        if commentfilter_enabled == 'False':
+            commentfilter_enabled = False  # 無効
+        else:
+            commentfilter_enabled = True  # 有効
+    except configparser.NoOptionError:  # キーが存在しない場合は有効にする
+        commentfilter_enabled = True
+
+    # 予約する番組でタグ編集を有効にするか
+    try:
+        tagedit_enabled = config.get('Default', 'tagedit_enabled')
+        if tagedit_enabled == 'False':
+            tagedit_enabled = False  # 無効
+        else:
+            tagedit_enabled = True  # 有効
+    except configparser.NoOptionError:  # キーが存在しない場合は有効にする
+        tagedit_enabled = True
+
     # 実況チャンネル名
     jikkyo_channel = JKLive.getJikkyoChannelName(jikkyo_id)
 
@@ -140,7 +160,8 @@ def main():
         time.sleep(0.5)
 
         # インスタンスを作成
-        jklive = JKLive(jikkyo_id, real_datetime, real_length, nicologin_mail, nicologin_password, autorun_weekly, autorun_daily)
+        jklive = JKLive(jikkyo_id, real_datetime, real_length, nicologin_mail, nicologin_password,
+                        autorun_weekly, autorun_daily, commentfilter_enabled, tagedit_enabled)
 
         print('-' * terminal_columns)
         print(f"番組タイトル: {jklive.generateTitle()}")

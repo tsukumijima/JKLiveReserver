@@ -56,7 +56,8 @@ class JKLive:
         'SERVICE_ERROR': '一時的なサーバ不調によりリクエストに失敗しました（リトライすると直る可能性もありますし、障害の可能性もあります）。',
     }
 
-    def __init__(self, jikkyo_id, datetime, length, nicologin_mail, nicologin_password, autorun_weekly=False, autorun_daily=False):
+    def __init__(self, jikkyo_id, datetime, length, nicologin_mail, nicologin_password,
+                 autorun_weekly=False, autorun_daily=False, commentfilter_enabled=True, tagedit_enabled=True):
 
         # 実況 ID
         self.jikkyo_id = jikkyo_id
@@ -73,13 +74,19 @@ class JKLive:
         # 予約する番組の長さ
         self.length = length
 
+        # メールアドレス・パスワード
+        self.nicologin_mail = nicologin_mail
+        self.nicologin_password = nicologin_password
+
         # タスクスケジューラなどからの自動実行かどうか
         self.autorun_weekly = autorun_weekly  # 毎週
         self.autorun_daily = autorun_daily  # 毎日
 
-        # メールアドレス・パスワード
-        self.nicologin_mail = nicologin_mail
-        self.nicologin_password = nicologin_password
+        # 予約する番組でAIコメントフィルターを有効にするか
+        self.commentfilter_enabled = commentfilter_enabled
+
+        # 予約する番組でタグ編集を有効にするか
+        self.tagedit_enabled = tagedit_enabled
 
     # 番組を予約する
     def reserve(self):
@@ -129,8 +136,10 @@ class JKLive:
             'category': '一般(その他)',
             # タグ
             'tags': tags,
+            # AIコメントフィルターを有効にするか
+            'isAutoCommentFilterEnabled': self.commentfilter_enabled,
             # タグ編集を無効にするか
-            'isTagOwnerLock': False,
+            'isTagOwnerLock': not self.tagedit_enabled,  # True と False を反転させる
             # 最大画質（実況番組では常に真っ黒で画質を上げても何の意味もないため、最低の画質に設定する）
             'maxQuality': '384kbps288p',
             # コミュニティ限定番組にするか
@@ -145,8 +154,6 @@ class JKLive:
             'isOfficialIchibaOnly': False,
             # 他番組から生放送引用されるのを許可するか
             'isQuotable': True,
-            # AIコメントフィルターを有効にするか
-            'isAutoCommentFilterEnabled': True,
         }
 
         # API にアクセス
