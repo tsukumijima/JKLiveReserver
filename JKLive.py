@@ -250,7 +250,7 @@ class JKLive:
 
         description = 'ニコニコ実況は、放送中のテレビ番組や起きているイベントに対して、みんなでコメントをし盛り上がりを共有する、リアルタイムコミュニケーションサービスです。<br>'
         if self.autorun_weekly is True:  # 毎週自動実行
-            description += f"この実況枠は JKLiveReserver https://git.io/JOGdT によって毎週{self.datetime.strftime('%a')}曜日に1週間分自動予約されています。<br>"
+            description += f"この実況枠は JKLiveReserver https://git.io/JOGdT によって毎週{dt.datetime.now().astimezone().strftime('%a')}曜日に1週間分自動予約されています。<br>"
         elif self.autorun_daily is True:  # 毎日自動実行
             description += f"この実況枠は JKLiveReserver https://git.io/JOGdT によって毎日1週間分自動予約されています。<br>"
         else:  # それ以外

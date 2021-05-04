@@ -100,7 +100,7 @@ def main():
         print('     曜日は 日・月・火・水・木・金・土 から選んで入力します。')
         print('     全 と入力すると、全ての曜日で毎日実況枠を予約します。')
         while True:
-            day = input('      実況枠を予約する曜日：')
+            day = input('     実況枠を予約する曜日：')
             flg = False
             for day_compare in dayofweek.keys():
                 if day_compare == day:
