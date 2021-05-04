@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import ctypes
 import datetime as dt
@@ -37,15 +37,16 @@ def is_int(s):
 
 def main():
 
-    # 曜日の対照表
+    # 曜日とタグの対照表
     dayofweek = {
-        '日': 'Sunday',
-        '月': 'Monday',
-        '火': 'Tuesday',
-        '水': 'Wednesday',
-        '木': 'Thursday',
-        '金': 'Friday',
-        '土': 'Saturday',
+        '日': '<Sunday />',
+        '月': '<Monday />',
+        '火': '<Tuesday />',
+        '水': '<Wednesday />',
+        '木': '<Thursday />',
+        '金': '<Friday />',
+        '土': '<Saturday />',
+        '全': '<Sunday /><Monday /><Tuesday /><Wednesday /><Thursday /><Friday /><Saturday />',
     }
 
     print('=' * terminal_columns)
@@ -97,10 +98,11 @@ def main():
 
         print('  3. 実況枠を予約する曜日を入力してください。')
         print('     曜日は 日・月・火・水・木・金・土 から選んで入力します。')
+        print('     全 を入力すると、全ての曜日で実況枠を予約します。')
         while True:
             day = input('      実況枠を予約する曜日：')
             flg = False
-            for day_compare in dayofweek:
+            for day_compare in dayofweek.keys():
                 if day_compare == day:
                     flg = True
             if flg is True:
@@ -129,6 +131,12 @@ def main():
 
         print('-' * terminal_columns)
 
+        # 毎日か毎週か
+        if day == '全':
+            autorun = '--autorun-daily'  # 毎日
+        else:
+            autorun = '--autorun-weekly'  # 毎週
+
         # 存在してもしなくてもとりあえず前のタスクを削除する
         subprocess.run(f"schtasks /Delete /F /TN \\JKLiveReserver", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
@@ -147,7 +155,7 @@ def main():
                         <Enabled>true</Enabled>
                         <ScheduleByWeek>
                             <DaysOfWeek>
-                                <{dayofweek[day]} />
+                                {dayofweek[day]}
                             </DaysOfWeek>
                             <WeeksInterval>1</WeeksInterval>
                         </ScheduleByWeek>
@@ -181,7 +189,7 @@ def main():
                 <Actions Context="Author">
                     <Exec>
                         <Command>{current_folder}\\JKLiveReserver.exe</Command>
-                        <Arguments>{jikkyo_id} --output-log</Arguments>
+                        <Arguments>{jikkyo_id} {autorun} --output-log</Arguments>
                     </Exec>
                 </Actions>
             </Task>
