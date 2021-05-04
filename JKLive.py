@@ -129,7 +129,7 @@ class JKLive:
             'category': '一般(その他)',
             # タグ
             'tags': tags,
-            # タグ編集をロックするか
+            # タグ編集を無効にするか
             'isTagOwnerLock': False,
             # 最大画質（実況番組では常に真っ黒で画質を上げても何の意味もないため、最低の画質に設定する）
             'maxQuality': '384kbps288p',
@@ -145,7 +145,7 @@ class JKLive:
             'isOfficialIchibaOnly': False,
             # 他番組から生放送引用されるのを許可するか
             'isQuotable': True,
-            # AIによるコメントのフィルタリングを許可するか
+            # AIコメントフィルターを有効にするか
             'isAutoCommentFilterEnabled': True,
         }
 
@@ -157,6 +157,7 @@ class JKLive:
 
             # 再ログイン
             user_session = self.__login(True)
+            headers['X-niconico-session'] = user_session
 
             # もう一度 API にアクセス
             response = requests.post(url, json.dumps(payload), headers=headers).json()
