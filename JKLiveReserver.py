@@ -182,7 +182,8 @@ def main():
                 print(f"エラー: {JKLive.getReserveErrorMessage(result['meta']['errorCode'])} ({result['data'][0]})")
             else:
                 print(f"エラー: {JKLive.getReserveErrorMessage(result['meta']['errorCode'])}")
-            return
+
+        return result['meta']
 
     # 番組の配信時間の長さが6時間以内
     if length_hour <= 6:
@@ -206,7 +207,22 @@ def main():
             if length_hour_count > 6:
 
                 # 6時間までの番組を予約
-                post(seek_datetime, dt.timedelta(hours=6))
+                result = post(seek_datetime, dt.timedelta(hours=6))
+
+                # 06:00 ～ 08:30 にかけての定期メンテナンスとの重複時
+                # 04:00 ～ 06:00 の枠と 08:30 ～ 10:00 までの枠に分割する
+                if (seek_datetime.strftime('%H:%M') == '04:00' and
+                    result['status'] == 400 and result['errorCode'] == 'OVERLAP_MAINTENANCE'):
+
+                    print('-' * terminal_columns)
+                    print('06:00 ～ 08:30 は定期メンテナンス中のため、04:00 ～ 06:00 と 08:30 ～ 10:00 の枠に分割して予約します。')
+
+                    # 04:00 ～ 06:00 の枠（2時間）
+                    post(seek_datetime, dt.timedelta(hours=2))
+
+                    # 08:30 ～ 10:00 の枠（1時間30分）
+                    # 4時間30分という値は 04:00 からの 08:30 までの時間を示す
+                    post(seek_datetime + dt.timedelta(hours=4, minutes=30), dt.timedelta(hours=1, minutes=30))
 
                 # 時間をずらす
                 seek_datetime = seek_datetime + dt.timedelta(hours=6)
