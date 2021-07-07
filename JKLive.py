@@ -160,7 +160,7 @@ class JKLive:
         response = requests.post(url, json.dumps(payload), headers=headers).json()
 
         # ログインセッション切れの場合はもう一度ログイン
-        if response['meta']['status'] != 201 and response['meta']['errorCode'] == 'AUTHENTICATION_FAILED':
+        if response['meta']['status'] == 401 and response['meta']['errorCode'] == 'AUTHENTICATION_FAILED':
 
             # 再ログイン
             user_session = self.__login(True)

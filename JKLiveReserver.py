@@ -211,8 +211,8 @@ def main():
 
                 # 06:00 ～ 08:30 にかけての定期メンテナンスとの重複時
                 # 04:00 ～ 06:00 の枠と 08:30 ～ 10:00 までの枠に分割する
-                if (seek_datetime.strftime('%H:%M') == '04:00' and
-                    result['status'] == 400 and result['errorCode'] == 'OVERLAP_MAINTENANCE'):
+                if seek_datetime.strftime('%H:%M') == '04:00' and \
+                   result['status'] == 400 and result['errorCode'] == 'OVERLAP_MAINTENANCE':
 
                     print('-' * terminal_columns)
                     print('06:00 ～ 08:30 は定期メンテナンス中のため、04:00 ～ 06:00 と 08:30 ～ 10:00 の枠に分割して予約します。')
