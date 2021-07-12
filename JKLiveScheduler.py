@@ -81,7 +81,7 @@ def main():
     if operation == 1:
 
         print('  2. 実況枠を予約する実況チャンネルの ID を入力してください。')
-        print('     例：jk101・jk222・jk333')
+        print('     例：jk161・jk222・jk333')
         while True:
             jikkyo_id = input('     実況枠を予約する実況チャンネルの ID：')
             flg = False
