@@ -14,7 +14,7 @@ import time
 from JKLive import JKLive
 
 # バージョン情報
-__version__ = '3.4.0'
+__version__ = '3.5.0'
 
 # このファイルが存在するフォルダの絶対パス
 current_folder = os.path.dirname(os.path.abspath(sys.argv[0]))
