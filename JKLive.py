@@ -35,6 +35,10 @@ class JKLive:
         'jk211': {'type': 'channel',   'id': 'ch2646846', 'name': 'BS11'},
         'jk222': {'type': 'community', 'id': 'co5193029', 'name': 'BS12'},
         'jk236': {'type': 'community', 'id': 'co5296297', 'name': 'BSアニマックス'},
+        'jk252': {'type': 'community', 'id': 'co5683458', 'name': 'WOWOW PLUS'},
+        'jk260': {'type': 'community', 'id': 'co5682554', 'name': 'BS松竹東急'},
+        'jk263': {'type': 'community', 'id': 'co5682551', 'name': 'BSJapanext'},
+        'jk265': {'type': 'community', 'id': 'co5682548', 'name': 'BSよしもと'},
         'jk333': {'type': 'community', 'id': 'co5245469', 'name': 'AT-X'},
     }
 
@@ -258,6 +262,10 @@ class JKLive:
         description += '<br>'
 
         for jikkyo_id, jikkyo_channel in self.jikkyo_channel_table.items():
+
+            # 文字数制限 (1000文字) に収まりきらないので、WOWOW は番組説明から省く
+            if jikkyo_id in ['jk191', 'jk192', 'jk193', 'jk252']:
+                continue
 
             # 注釈を入れる
             if jikkyo_id == 'jk1':
