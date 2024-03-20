@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "JKLiveReserver"
+version = "3.5.0"
+description = "ニコニコ実況用のコミュニティ番組を一括で自動予約（枠取り）するツール"
+authors = ["tsukumi <tsukumijima@users.noreply.github.com>"]
+# ref: https://github.com/python-poetry/poetry/issues/1537#issuecomment-1154642727
+classifiers = ["Private :: Do Not Upload"]
+
+[tool.taskipy.tasks]
+build-windows = """
+pyinstaller --onefile JKLiveReserver.py &&
+mv dist/JKLiveReserver.exe JKLiveReserver.exe &&
+pyinstaller --onefile JKLiveScheduler.py &&
+mv dist/JKLiveScheduler.exe JKLiveScheduler.exe
+"""
+build-linux = """
+pyinstaller --onefile JKLiveReserver.py &&
+mv dist/JKLiveReserver JKLiveReserver &&
+chmod a+x JKLiveReserver
+"""
+
+[tool.poetry.dependencies]
+python = "~3.11"
+pyinstaller = "^6.5.0"
+python-dateutil = "^2.9.0.post0"
+requests = "^2.31.0"
+taskipy = "^1.12.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
