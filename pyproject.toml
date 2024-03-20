@@ -7,17 +7,8 @@ authors = ["tsukumi <tsukumijima@users.noreply.github.com>"]
 classifiers = ["Private :: Do Not Upload"]
 
 [tool.taskipy.tasks]
-build-windows = """
-pyinstaller --onefile JKLiveReserver.py &&
-mv dist/JKLiveReserver.exe JKLiveReserver.exe &&
-pyinstaller --onefile JKLiveScheduler.py &&
-mv dist/JKLiveScheduler.exe JKLiveScheduler.exe
-"""
-build-linux = """
-pyinstaller --onefile JKLiveReserver.py
-mv dist/JKLiveReserver JKLiveReserver
-chmod a+x JKLiveReserver
-"""
+build-windows = "pyinstaller --onefile JKLiveReserver.py && mv dist/JKLiveReserver.exe JKLiveReserver.exe && pyinstaller --onefile JKLiveScheduler.py && mv dist/JKLiveScheduler.exe JKLiveScheduler.exe"
+build-linux = "pyinstaller --onefile JKLiveReserver.py && mv dist/JKLiveReserver JKLiveReserver && chmod a+x JKLiveReserver"
 
 [tool.poetry.dependencies]
 python = "~3.11"
