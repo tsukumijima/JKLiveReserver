@@ -233,20 +233,47 @@ def main() -> None:
             # 残り配信時間長分の長さの番組を予約
             result = post(reservation_begin_time, reservation_duration)
 
+            # 04:00 よりも前 〜 08:30 までの全停止メンテナンスとの重複時
+            ## 1年に1〜2回ある: 03:00 〜 08:30 など
+            ## この場合 16:00 〜 04:00 の実況枠の予約に失敗するので、予約が成功するまで30分ずつ配信時間長を短縮して予約を試みる
+            ## ref: https://blog.nicovideo.jp/niconews/212306.html
+            if (result['errorCode'] == 'OVERLAP_MAINTENANCE') and ((reservation_begin_time + reservation_duration).strftime('%H:%M') == '04:00'):
+
+                print('-' * TERMINAL_COLUMNS)
+                print('04:00 より前 ～ 08:30 はおそらく定期メンテナンス中のため、配信時間長を30分短縮して予約を試みます。')
+
+                new_reservation_duration = reservation_duration - timedelta(minutes=30)
+                while True:
+
+                    # 再度予約を試みる
+                    result = post(reservation_begin_time, new_reservation_duration)
+
+                    # 予約に成功したら終了
+                    ## 成功時は errorCode が CREATED になる
+                    ## 万が一別の何らかの要因で失敗した場合は諦めて次の実況枠の予約を試みる
+                    if result['errorCode'] != 'OVERLAP_MAINTENANCE':
+                        break
+
+                    # 予約できなかったので、さらに30分ずつ配信時間長を短縮して予約を試みる
+                    print('-' * TERMINAL_COLUMNS)
+                    print('配信時間長をさらに30分短縮して予約を試みます。')
+                    new_reservation_duration = new_reservation_duration - timedelta(minutes=30)
+
             # 06:00 ～ 08:30 にかけての定期メンテナンスとの重複時
-            # 04:00 ～ 06:00 の枠と 08:30 ～ 16:00 までの枠に分割する
+            ## 04:00 ～ 06:00 の枠と 08:30 ～ 16:00 までの枠に分割する
             if (result['errorCode'] == 'OVERLAP_MAINTENANCE') and (reservation_begin_time.strftime('%H:%M') == '04:00'):
 
                 print('-' * TERMINAL_COLUMNS)
                 print('06:00 ～ 08:30 はおそらく定期メンテナンス中のため、04:00 ～ 06:00 と 08:30 ～ 16:00 の枠に分割して予約します。')
 
                 # 04:00 ～ 06:00 の枠（2時間）
-                ## メンテナンス開始時刻が 06:30 より前の場合 (稀にある: 03:30 〜 08:30 など) は予約に失敗するが、
-                ## そうした状況では 04:00 〜 06:00 の時間帯全体がメンテナンスで埋まっていることが多いため、エラーを無視する
+                ## メンテナンス開始時刻が 06:30 より前の場合 (1年に1〜2回ある: 03:00 〜 08:30 など) は予約に失敗するが、
+                ## そうした状況では基本 04:00 〜 06:00 の時間帯全体がメンテナンスで埋まるため、エラーを無視する
                 result = post(reservation_begin_time, timedelta(hours=2))
 
                 # 08:30 ～ 16:00 の枠（7時間30分）
-                # 4時間30分という値は 04:00 からの 08:30 までの時間を示す
+                ## 4時間30分という値は 04:00 から 08:30 までの経過時間を示す
+                ## 過去1年間にメンテナンス終了時刻が 08:30 を超えたことはないため、考慮しない
                 post(reservation_begin_time + timedelta(hours=4, minutes=30), timedelta(hours=7, minutes=30))
 
             # 次の予約開始時刻をずらす
