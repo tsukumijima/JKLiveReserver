@@ -234,18 +234,20 @@ def main() -> None:
             result = post(reservation_begin_time, reservation_duration)
 
             # 06:00 ～ 08:30 にかけての定期メンテナンスとの重複時
-            # 04:00 ～ 06:00 の枠と 08:30 ～ 10:00 までの枠に分割する
+            # 04:00 ～ 06:00 の枠と 08:30 ～ 16:00 までの枠に分割する
             if (result['errorCode'] == 'OVERLAP_MAINTENANCE') and (reservation_begin_time.strftime('%H:%M') == '04:00'):
 
                 print('-' * TERMINAL_COLUMNS)
-                print('06:00 ～ 08:30 はおそらく定期メンテナンス中のため、04:00 ～ 06:00 と 08:30 ～ 10:00 の枠に分割して予約します。')
+                print('06:00 ～ 08:30 はおそらく定期メンテナンス中のため、04:00 ～ 06:00 と 08:30 ～ 16:00 の枠に分割して予約します。')
 
                 # 04:00 ～ 06:00 の枠（2時間）
-                post(reservation_begin_time, timedelta(hours=2))
+                ## メンテナンス開始時刻が 06:30 より前の場合 (稀にある: 03:30 〜 08:30 など) は予約に失敗するが、
+                ## そうした状況では 04:00 〜 06:00 の時間帯全体がメンテナンスで埋まっていることが多いため、エラーを無視する
+                result = post(reservation_begin_time, timedelta(hours=2))
 
-                # 08:30 ～ 10:00 の枠（1時間30分）
+                # 08:30 ～ 16:00 の枠（7時間30分）
                 # 4時間30分という値は 04:00 からの 08:30 までの時間を示す
-                post(reservation_begin_time + timedelta(hours=4, minutes=30), timedelta(hours=1, minutes=30))
+                post(reservation_begin_time + timedelta(hours=4, minutes=30), timedelta(hours=7, minutes=30))
 
             # 次の予約開始時刻をずらす
             reservation_begin_time = reservation_begin_time + reservation_duration
