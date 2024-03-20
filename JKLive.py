@@ -72,8 +72,8 @@ class JKLive:
 
     def __init__(self,
         jikkyo_id: str,
-        datetime: datetime,
-        length: timedelta,
+        reservation_begin_time: datetime,
+        reservation_duration: timedelta,
         nicologin_mail: str,
         nicologin_password: str,
         autorun_weekly: bool = False,
@@ -94,10 +94,10 @@ class JKLive:
         self.community_id = self.getNicoCommunityID(self.jikkyo_id)
 
         # 予約する番組の日付時刻
-        self.datetime = datetime
+        self.reservation_begin_time = reservation_begin_time
 
         # 予約する番組の長さ
-        self.length = length
+        self.reservation_duration = reservation_duration
 
         # メールアドレス・パスワード
         self.nicologin_mail = nicologin_mail
@@ -156,10 +156,10 @@ class JKLive:
             # 番組説明
             'description': description,
             # 番組開始時刻
-            'reservationBeginTime': self.datetime.isoformat(),
+            'reservationBeginTime': self.reservation_begin_time.isoformat(),
             # 番組時間（分単位）
             # 参考: https://qiita.com/ksato9700/items/f8a2ea86c20ac0f34538
-            'durationMinutes': int(self.length / timedelta(minutes=1)),
+            'durationMinutes': int(self.reservation_duration / timedelta(minutes=1)),
             # カテゴリ
             'category': '一般(その他)',
             # タグ
@@ -232,7 +232,7 @@ class JKLive:
     # 番組タイトルを生成する
     def generateTitle(self) -> str:
 
-        return f'{self.jikkyo_channel}【ニコニコ実況】{self.datetime.strftime("%Y年%m月%d日 %H:%M")}～{(self.datetime + self.length).strftime("%H:%M")}'
+        return f'{self.jikkyo_channel}【ニコニコ実況】{self.reservation_begin_time.strftime("%Y年%m月%d日 %H:%M")}～{(self.reservation_begin_time + self.reservation_duration).strftime("%H:%M")}'
 
 
     # 番組説明を生成する

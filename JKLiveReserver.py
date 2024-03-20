@@ -16,12 +16,17 @@ from typing import Any
 from JKLive import JKLive, __version__
 
 
+# ユーザー番組の最長放送可能時間 (時間単位)
+## ユーザーレベル 40 以降なら 24 時間配信可能だが、基本ユーザーレベル 40 に達し得ないため 12 時間に設定
+## ref: https://blog.nicovideo.jp/niconews/213237.html
+USER_PROGRAM_MAX_HOUR = 12  # 12時間
+
 # このファイルが存在するフォルダの絶対パス
-current_folder = os.path.dirname(os.path.abspath(sys.argv[0]))
+CURRENT_FOLDER = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 # ターミナルの横幅
 # conhost.exe だと -1px しないと改行されてしまう
-terminal_columns = shutil.get_terminal_size().columns - 1
+TERMINAL_COLUMNS = shutil.get_terminal_size().columns - 1
 
 
 def main() -> None:
@@ -34,7 +39,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description='ニコニコ実況用のコミュニティ番組を一括で予約（枠取り）するツール', formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('Channel', help='予約する実況チャンネルのID (ex: jk161)')
     parser.add_argument('-d', '--date', default=None, help='予約する番組の開始時刻 (ex: 2021/04/15/04:00)\n省略すると現在時刻以降の朝4時の日付に設定されます')
-    parser.add_argument('-l', '--length', default=168, help='予約する番組の配信時間の長さ (時間単位) (ex: 24)\n省略すると 168（7日間）に設定されます\n最大配信時間が6時間までのため、6時間以降は番組を分割して予約します')
+    parser.add_argument('-l', '--length', default=168, help='予約する番組の配信時間の長さ (時間単位) (ex: 24)\n省略すると 168（7日間）に設定されます\n最長放送可能時間が通常12時間までのため、12時間以降は番組を分割して予約します')
     parser.add_argument('-o', '--output-log', action='store_true', help='実行ログをファイルに出力するかどうか')
     parser.add_argument('-aw', '--autorun-weekly', action='store_true', help='タスクスケジューラなどからの自動実行かどうか（毎週）\n指定すると予約した番組の説明欄に毎週指定された曜日に自動で予約している旨を追記します')
     parser.add_argument('-ad', '--autorun-daily', action='store_true', help='タスクスケジューラなどからの自動実行かどうか（毎日）\n指定すると予約した番組の説明欄に毎日自動で予約している旨を追記します')
@@ -47,8 +52,8 @@ def main() -> None:
 
     # 標準出力をファイルに変更
     if args.output_log is True:
-        sys.stdout = open(current_folder + '/JKLiveReserver.log', mode='w', encoding='UTF-8')
-        sys.stderr = open(current_folder + '/JKLiveReserver.log', mode='w', encoding='UTF-8')
+        sys.stdout = open(CURRENT_FOLDER + '/JKLiveReserver.log', mode='w', encoding='UTF-8')
+        sys.stderr = open(CURRENT_FOLDER + '/JKLiveReserver.log', mode='w', encoding='UTF-8')
 
     # 実況ID
     jikkyo_id = args.Channel.rstrip()
@@ -74,33 +79,33 @@ def main() -> None:
 
     # 予約する番組の配信時間の長さ
     length = timedelta(hours=int(args.length))
-    length_hour = int(args.length)
+    duration_hours = int(args.length)
 
     # 行区切り
-    print('=' * terminal_columns)
+    print('=' * TERMINAL_COLUMNS)
 
     # 予約可能期間外かチェック
     if target_datetime > max_datetime:
         print(f"番組の予約に失敗しました。")
         print(f"エラー: {target_datetime.strftime('%Y/%m/%d %H:%M')} は予約可能時間外のため予約できません。予約可能な期間は予約日から1週間です。")
-        print('=' * terminal_columns)
+        print('=' * TERMINAL_COLUMNS)
         sys.exit(1)
     if target_datetime < now_datetime:
         print(f"番組の予約に失敗しました。")
         print(f"エラー: {target_datetime.strftime('%Y/%m/%d %H:%M')} はすでに過ぎた日付です。予約可能な期間は予約日から1週間です。")
-        print('=' * terminal_columns)
+        print('=' * TERMINAL_COLUMNS)
         sys.exit(1)
-    if length_hour > 168 or length_hour < 1:
+    if duration_hours > 168 or duration_hours < 1:
         print(f"番組の予約に失敗しました。")
         print(f"エラー: 予約する番組の配信時間が不正です。")
-        print('=' * terminal_columns)
+        print('=' * TERMINAL_COLUMNS)
         sys.exit(1)
 
     # コミュニティ ID が取得できなかったら終了
     if JKLive.getNicoCommunityID(jikkyo_id) is None:
         print(f"番組の予約に失敗しました。")
         print(f"エラー: 実況チャンネル {jikkyo_id} に該当するニコニコミュニティが見つかりませんでした。")
-        print('=' * terminal_columns)
+        print('=' * TERMINAL_COLUMNS)
         sys.exit(1)
 
     # ニコ生がメンテナンス中やサーバーエラーでないかを確認
@@ -113,16 +118,16 @@ def main() -> None:
             print('エラー: 現在、ニコ生はメンテナンス中です。(HTTP Error 503)')
         else:
             print(f"エラー: 現在、ニコ生でエラーが発生しています。(HTTP Error {nicolive_status_code})")
-        print('=' * terminal_columns)
+        print('=' * TERMINAL_COLUMNS)
         sys.exit(1)
 
     # 設定読み込み
-    config_ini = current_folder + '/JKLiveReserver.ini'
+    config_ini = CURRENT_FOLDER + '/JKLiveReserver.ini'
     if not os.path.exists(config_ini):
         print(f"番組の予約に失敗しました。")
         print('エラー: JKLiveReserver.ini が存在しません。JKLiveReserver.example.ini からコピーし、')
         print('適宜設定を変更して JKLiveReserver と同じ場所に配置してください。')
-        print('=' * terminal_columns)
+        print('=' * TERMINAL_COLUMNS)
         sys.exit(1)
     config = configparser.ConfigParser()
     config.read(config_ini, encoding='UTF-8')
@@ -157,7 +162,7 @@ def main() -> None:
     print(f"{jikkyo_channel} の実況番組を " +
           f"{target_datetime.strftime('%Y/%m/%d %H:%M')} から {(target_datetime + length).strftime('%Y/%m/%d %H:%M')} まで予約します。")
 
-    def post(real_datetime: datetime, real_length: timedelta) -> dict[str, Any]:
+    def post(reservation_begin_time: datetime, reservation_duration: timedelta) -> dict[str, Any]:
 
         # 0.5 秒待つ
         time.sleep(0.5)
@@ -165,8 +170,8 @@ def main() -> None:
         # インスタンスを作成
         jklive = JKLive(
             jikkyo_id,
-            real_datetime,
-            real_length,
+            reservation_begin_time,
+            reservation_duration,
             nicologin_mail,
             nicologin_password,
             autorun_weekly,
@@ -175,10 +180,10 @@ def main() -> None:
             tagedit_enabled,
         )
 
-        print('-' * terminal_columns)
+        print('-' * TERMINAL_COLUMNS)
         print(f"番組タイトル: {jklive.generateTitle()}")
-        print(f"番組開始時刻: {real_datetime.strftime('%Y/%m/%d %H:%M:%S')}  " +
-              f"番組終了時刻: {(real_datetime + real_length).strftime('%Y/%m/%d %H:%M:%S')}")
+        print(f"番組開始時刻: {reservation_begin_time.strftime('%Y/%m/%d %H:%M:%S')}  " +
+              f"番組終了時刻: {(reservation_begin_time + reservation_duration).strftime('%Y/%m/%d %H:%M:%S')}")
 
         # 番組を予約する
         result = jklive.reserve()
@@ -196,70 +201,65 @@ def main() -> None:
 
         return result['meta']
 
-    # 番組の配信時間の長さが6時間以内
-    if length_hour <= 6:
+    # 番組の配信時間長が最長放送可能時間以下の場合
+    if duration_hours <= USER_PROGRAM_MAX_HOUR:
 
         # 番組予約をそのまま実行
         post(target_datetime, length)
 
-    # 番組の配信時間の長さが7時間以上
-    # ユーザー番組は最長6時間までのため、番組を分割する
-    elif length_hour > 6:
+    # ユーザー番組の最長放送可能時間を超える場合、番組を分割する
+    elif duration_hours > USER_PROGRAM_MAX_HOUR:
 
-        # 予約した6時間ごとの番組に合わせてずらす時間
-        seek_datetime = copy.copy(target_datetime)
+        # 予約開始時刻
+        reservation_begin_time = copy.copy(target_datetime)
 
-        # 残り配信時間
-        length_hour_count = copy.copy(length_hour)
+        # 残り配信時間長
+        remain_duration_hours = copy.copy(duration_hours)
 
         while True:
 
-            # 残り配信時間が7時間以上なら
-            if length_hour_count > 6:
+            # 残り配信時間長が最長放送可能時間より長い場合
+            if remain_duration_hours > USER_PROGRAM_MAX_HOUR:
 
-                # 6時間までの番組を予約
-                result = post(seek_datetime, timedelta(hours=6))
+                # 配信時間長を最長放送可能時間に設定
+                reservation_duration = timedelta(hours=USER_PROGRAM_MAX_HOUR)
 
-                # 06:00 ～ 08:30 にかけての定期メンテナンスとの重複時
-                # 04:00 ～ 06:00 の枠と 08:30 ～ 10:00 までの枠に分割する
-                if seek_datetime.strftime('%H:%M') == '04:00' and \
-                   result['status'] == 400 and result['errorCode'] == 'OVERLAP_MAINTENANCE':
-
-                    print('-' * terminal_columns)
-                    print('06:00 ～ 08:30 は定期メンテナンス中のため、04:00 ～ 06:00 と 08:30 ～ 10:00 の枠に分割して予約します。')
-
-                    # 04:00 ～ 06:00 の枠（2時間）
-                    post(seek_datetime, timedelta(hours=2))
-
-                    # 08:30 ～ 10:00 の枠（1時間30分）
-                    # 4時間30分という値は 04:00 からの 08:30 までの時間を示す
-                    post(seek_datetime + timedelta(hours=4, minutes=30), timedelta(hours=1, minutes=30))
-
-                # 時間をずらす
-                seek_datetime = seek_datetime + timedelta(hours=6)
-
-                # 残り配信時間を減らす
-                length_hour_count = length_hour_count - 6
-
-            # 残り配信時間が6時間以下なら
+            # 残り配信時間長が最長放送可能時間以下の場合
             else:
 
-                # 残り配信時間分の長さの番組を予約
-                post(seek_datetime, timedelta(hours=length_hour_count))
+                # 配信時間長を残り配信時間長に設定
+                reservation_duration = timedelta(hours=remain_duration_hours)
 
-                # 時間をずらす
-                seek_datetime = seek_datetime + timedelta(hours=length_hour_count)
+            # 残り配信時間長分の長さの番組を予約
+            result = post(reservation_begin_time, reservation_duration)
 
-                # 残り配信時間を減らす
-                length_hour_count = length_hour_count - length_hour_count
+            # 06:00 ～ 08:30 にかけての定期メンテナンスとの重複時
+            # 04:00 ～ 06:00 の枠と 08:30 ～ 10:00 までの枠に分割する
+            if (result['errorCode'] == 'OVERLAP_MAINTENANCE') and (reservation_begin_time.strftime('%H:%M') == '04:00'):
 
-            # 残り時間が1時間未満なら終了
-            if length_hour_count < 1:
+                print('-' * TERMINAL_COLUMNS)
+                print('06:00 ～ 08:30 はおそらく定期メンテナンス中のため、04:00 ～ 06:00 と 08:30 ～ 10:00 の枠に分割して予約します。')
+
+                # 04:00 ～ 06:00 の枠（2時間）
+                post(reservation_begin_time, timedelta(hours=2))
+
+                # 08:30 ～ 10:00 の枠（1時間30分）
+                # 4時間30分という値は 04:00 からの 08:30 までの時間を示す
+                post(reservation_begin_time + timedelta(hours=4, minutes=30), timedelta(hours=1, minutes=30))
+
+            # 次の予約開始時刻をずらす
+            reservation_begin_time = reservation_begin_time + reservation_duration
+
+            # 残り配信時間長を減らす
+            remain_duration_hours = remain_duration_hours - (reservation_duration.total_seconds() / 60 / 60)
+
+            # 残り配信時間長が1時間未満なら終了
+            if remain_duration_hours < 1:
                 break
 
-    print('-' * terminal_columns)
-    print(f"番組の予約を終了しました。")
-    print('=' * terminal_columns)
+    print('-' * TERMINAL_COLUMNS)
+    print(f"番組の予約を完了しました。")
+    print('=' * TERMINAL_COLUMNS)
 
 
 if __name__ == '__main__':
