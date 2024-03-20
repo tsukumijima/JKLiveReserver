@@ -32,7 +32,7 @@ class JKLive:
         'jk11': {'type': 'community', 'id': 'co5215296', 'name': 'tvk'},
         'jk12': {'type': 'community', 'id': 'co5359761', 'name': 'チバテレビ'},
         'jk101': {'type': 'channel', 'id': 'ch2647992', 'name': 'NHK BS1'},
-        'jk103': {'type': 'community', 'id': 'co5175227', 'name': 'NHK BSプレミアム'},
+        # 'jk103': {'type': 'community', 'id': 'co5175227', 'name': 'NHK BSプレミアム'},  # 閉局に伴い削除
         'jk141': {'type': 'community', 'id': 'co5175341', 'name': 'BS日テレ'},
         'jk151': {'type': 'community', 'id': 'co5175345', 'name': 'BS朝日'},
         'jk161': {'type': 'community', 'id': 'co5176119', 'name': 'BS-TBS'},
