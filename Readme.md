@@ -69,7 +69,7 @@ Linux でも実行できます。上級者向けなので細かい説明は省�
 
 <img width="650" src="https://user-images.githubusercontent.com/39271166/115256891-972f5900-a16a-11eb-8484-6094549a1654.png"><br>
 
-[こちら](https://github.com/tsukumijima/JKLiveReserver/releases) のリリースから、［Source code (zip)］をクリックして Zip ファイルをダウンロードします。
+[こちら](https://github.com/tsukumijima/JKLiveReserver/releases) のリリースから、最新のバージョンの［Source code (zip)］をクリックして、Zip ファイルをダウンロードします。
 
 ダウンロードできたら解凍し、好きなフォルダに配置します。なお、`C:\Program Files` 以下のフォルダに配置するのは避けてください。
 
