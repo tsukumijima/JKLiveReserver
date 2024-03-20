@@ -14,8 +14,8 @@ pyinstaller --onefile JKLiveScheduler.py &&
 mv dist/JKLiveScheduler.exe JKLiveScheduler.exe
 """
 build-linux = """
-pyinstaller --onefile JKLiveReserver.py &&
-mv dist/JKLiveReserver JKLiveReserver &&
+pyinstaller --onefile JKLiveReserver.py
+mv dist/JKLiveReserver JKLiveReserver
 chmod a+x JKLiveReserver
 """
 
