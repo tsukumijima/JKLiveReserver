@@ -1,16 +1,25 @@
 
-import datetime as dt
 import json
 import os
 import pickle
 import requests
 import sys
+from datetime import datetime
+from datetime import timedelta
+from typing import Any
+
+
+# バージョン情報
+__version__ = '3.5.0'
 
 
 class JKLive:
 
+    # User-Agent
+    USER_AGENT = f'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 JKLiveReserver/{__version__}'
+
     # 実況 ID とチャンネル/コミュニティ ID の対照表
-    jikkyo_channel_table = {
+    JIKKYO_CHANNELS = {
         'jk1': {'type': 'channel', 'id': 'ch2646436', 'name': 'NHK総合'},
         'jk2': {'type': 'channel', 'id': 'ch2646437', 'name': 'NHK Eテレ'},
         'jk4': {'type': 'channel', 'id': 'ch2646438', 'name': '日本テレビ'},
@@ -43,7 +52,7 @@ class JKLive:
     }
 
     # 生放送のエラーメッセージの対照表
-    reserve_error_table = {
+    RESERVE_ERROR_CODES = {
         'INVALID_PARAMETER': 'リクエストに無効なパラメータがあります。',
         'INVALID_TAGS': '無効なタグ指定があります。',
         'OVERLAP_MAINTENANCE': '番組放送時間にメンテナンス時間が重複しています。',
@@ -60,14 +69,26 @@ class JKLive:
         'SERVICE_ERROR': '一時的なサーバ不調によりリクエストに失敗しました（リトライすると直る可能性もありますし、障害の可能性もあります）。',
     }
 
-    def __init__(self, jikkyo_id, datetime, length, nicologin_mail, nicologin_password,
-                 autorun_weekly=False, autorun_daily=False, commentfilter_enabled=True, tagedit_enabled=True):
+
+    def __init__(self,
+        jikkyo_id: str,
+        datetime: datetime,
+        length: timedelta,
+        nicologin_mail: str,
+        nicologin_password: str,
+        autorun_weekly: bool = False,
+        autorun_daily: bool = False,
+        commentfilter_enabled: bool = True,
+        tagedit_enabled: bool = True,
+    ) -> None:
 
         # 実況 ID
         self.jikkyo_id = jikkyo_id
 
         # 実況チャンネル名
-        self.jikkyo_channel = self.getJikkyoChannelName(self.jikkyo_id)
+        jikkyo_channel = self.getJikkyoChannelName(self.jikkyo_id)
+        assert jikkyo_channel is not None, f'実況 ID {jikkyo_id} は存在しません。'
+        self.jikkyo_channel = jikkyo_channel
 
         # 実況 ID に紐づくコミュニティ ID
         self.community_id = self.getNicoCommunityID(self.jikkyo_id)
@@ -92,8 +113,9 @@ class JKLive:
         # 予約する番組でタグ編集を有効にするか
         self.tagedit_enabled = tagedit_enabled
 
+
     # 番組を予約する
-    def reserve(self):
+    def reserve(self) -> dict[str, Any]:
 
         # API の URL
         url = 'https://live2.nicovideo.jp/unama/api/v2/programs'
@@ -114,13 +136,15 @@ class JKLive:
             {'label': '実況', 'isLocked': True},
             {'label': '雑談', 'isLocked': True},
             {'label': self.jikkyo_channel.replace(' ', '_'), 'isLocked': True},
+            {'label': self.jikkyo_id, 'isLocked': True},
         ]
 
         # API に渡すヘッダー
         headers = {
-            'X-niconico-session': user_session,
             'Accept': 'application/json',
             'Content-Type': 'application/json',
+            'User-Agent': self.USER_AGENT,
+            'X-niconico-session': user_session,
         }
 
         # API に渡すペイロード
@@ -135,7 +159,7 @@ class JKLive:
             'reservationBeginTime': self.datetime.isoformat(),
             # 番組時間（分単位）
             # 参考: https://qiita.com/ksato9700/items/f8a2ea86c20ac0f34538
-            'durationMinutes': int(self.length / dt.timedelta(minutes=1)),
+            'durationMinutes': int(self.length / timedelta(minutes=1)),
             # カテゴリ
             'category': '一般(その他)',
             # タグ
@@ -154,7 +178,7 @@ class JKLive:
             'isUadEnabled': True,
             # ニコニコ市場を利用するか
             'isIchibaEnabled': True,
-            # ［Amazon商品］［ニコニコQ］の貼り付け制限
+            # [Amazon商品] [ニコニコQ] の貼り付け制限
             'isOfficialIchibaOnly': False,
             # 他番組から生放送引用されるのを許可するか
             'isQuotable': True,
@@ -177,49 +201,9 @@ class JKLive:
         # 成功/失敗判定は結果を受け取った側で行う
         return response
 
-    # 実況 ID リストを取得
-    @staticmethod
-    def getJikkyoChannelList():
-        return JKLive.jikkyo_channel_table.keys()
-
-    # 実況 ID から実況チャンネル名を取得
-    @staticmethod
-    def getJikkyoChannelName(jikkyo_id):
-        if jikkyo_id in JKLive.jikkyo_channel_table:
-            return JKLive.jikkyo_channel_table[jikkyo_id]['name']
-        else:
-            return None
-
-    # 実況 ID からニコニコミュニティの ID を取得
-    # jk1 のような公式実況チャンネルでは None を返す
-    @staticmethod
-    def getNicoCommunityID(jikkyo_id):
-        if jikkyo_id in JKLive.jikkyo_channel_table and JKLive.jikkyo_channel_table[jikkyo_id]['type'] == 'community':
-            return JKLive.jikkyo_channel_table[jikkyo_id]['id']
-        else:
-            return None
-
-    # ニコ生がメンテナンス中やサーバーエラーでないかを確認
-    @staticmethod
-    def getNicoLiveStatus():
-        nicolive_url = 'https://live.nicovideo.jp/'
-        response = requests.get(nicolive_url)  # レスポンスを取得
-        # HTTP ステータスコードで判定
-        if response.status_code == 200:
-            return [True, response.status_code]
-        else:
-            return [False, response.status_code]
-
-    # 予約失敗時のエラーコードからエラーメッセージを取得する
-    @staticmethod
-    def getReserveErrorMessage(error_code):
-        if error_code in JKLive.reserve_error_table:
-            return JKLive.reserve_error_table[error_code]
-        else:
-            return None
 
     # ニコニコにログインする
-    def __login(self, force=False):
+    def __login(self, force: bool = False) -> str:
 
         cookie_dump = os.path.dirname(os.path.abspath(sys.argv[0])) + '/cookie.dump'
 
@@ -236,7 +220,7 @@ class JKLive:
             url = 'https://account.nicovideo.jp/api/v1/login'
             post = {'mail': self.nicologin_mail, 'password': self.nicologin_password}
             session = requests.session()
-            session.post(url, post)
+            session.post(url, post, headers={'User-Agent': self.USER_AGENT})
 
             # Cookie を保存
             with open(cookie_dump, 'wb') as f:
@@ -244,30 +228,32 @@ class JKLive:
 
             return session.cookies.get('user_session')
 
-    # 番組タイトルを生成する
-    def generateTitle(self):
 
-        return f"{self.jikkyo_channel}【ニコニコ実況】{self.datetime.strftime('%Y年%m月%d日 %H:%M')}～{(self.datetime + self.length).strftime('%H:%M')}"
+    # 番組タイトルを生成する
+    def generateTitle(self) -> str:
+
+        return f'{self.jikkyo_channel}【ニコニコ実況】{self.datetime.strftime("%Y年%m月%d日 %H:%M")}～{(self.datetime + self.length).strftime("%H:%M")}'
+
 
     # 番組説明を生成する
-    def generateDescription(self):
+    def generateDescription(self) -> str:
 
         description = 'ニコニコ実況は、放送中のテレビ番組や起きているイベントに対して、みんなでコメントをし盛り上がりを共有する、リアルタイムコミュニケーションサービスです。<br>'
         if self.autorun_weekly is True:  # 毎週自動実行
-            description += f"この実況枠は JKLiveReserver https://git.io/JOGdT によって毎週{dt.datetime.now().astimezone().strftime('%a')}曜日に1週間分自動予約されています。<br>"
+            description += f'この実況枠は JKLiveReserver https://git.io/JOGdT によって毎週{datetime.now().astimezone().strftime("%a")}曜日に1週間分自動予約されています。<br>'
         elif self.autorun_daily is True:  # 毎日自動実行
-            description += f"この実況枠は JKLiveReserver https://git.io/JOGdT によって毎日1週間分自動予約されています。<br>"
+            description += 'この実況枠は JKLiveReserver https://git.io/JOGdT によって毎日1週間分自動予約されています。<br>'
         else:  # それ以外
-            description += f"この実況枠は JKLiveReserver https://git.io/JOGdT によって自動予約されています。<br>"
+            description += 'この実況枠は JKLiveReserver https://git.io/JOGdT によって自動予約されています。<br>'
         description += '<br>'
 
-        for jikkyo_id, jikkyo_channel in self.jikkyo_channel_table.items():
+        for jikkyo_id, jikkyo_channel in self.JIKKYO_CHANNELS.items():
 
-            # 文字数制限 (1000文字) に収まりきらないので、WOWOW は番組説明から省く
+            # 文字数制限 (1000文字) に収まりきらないので、ほぼ利用されていない WOWOW は番組説明から省く
             if jikkyo_id in ['jk191', 'jk192', 'jk193', 'jk252']:
                 continue
 
-            # 注釈を入れる
+            # 見出しを入れる
             if jikkyo_id == 'jk1':
                 description += '<b>地デジ</b><br>'
             if jikkyo_id == 'jk101':
@@ -275,6 +261,56 @@ class JKLive:
                 description += '<b>BS・CS</b><br>'
 
             # 現在のチャンネルの情報を追記していく
-            description += f"{jikkyo_channel['name']}：{jikkyo_channel['id']} ({jikkyo_id})<br>"
+            description += f'{jikkyo_channel["name"]}：https://live.nicovideo.jp/watch/{jikkyo_channel["id"]} ({jikkyo_id})'
+            if self.jikkyo_id == jikkyo_id:
+                description += '<b> ⬅️ NOW</b>'
+            description += '<br>'
+
+        description += '<br>BS総合避難所：co5117214 (全実況チャンネル一覧もこちらから)'
 
         return description
+
+
+    # 実況 ID リストを取得
+    @staticmethod
+    def getJikkyoChannelList():
+        return JKLive.JIKKYO_CHANNELS.keys()
+
+
+    # 実況 ID から実況チャンネル名を取得
+    @staticmethod
+    def getJikkyoChannelName(jikkyo_id) -> str | None:
+        if jikkyo_id in JKLive.JIKKYO_CHANNELS:
+            return JKLive.JIKKYO_CHANNELS[jikkyo_id]['name']
+        else:
+            return None
+
+
+    # 実況 ID からニコニコミュニティの ID を取得
+    # jk1 のような公式実況チャンネルでは None を返す
+    @staticmethod
+    def getNicoCommunityID(jikkyo_id) -> str | None:
+        if jikkyo_id in JKLive.JIKKYO_CHANNELS and JKLive.JIKKYO_CHANNELS[jikkyo_id]['type'] == 'community':
+            return JKLive.JIKKYO_CHANNELS[jikkyo_id]['id']
+        else:
+            return None
+
+
+    # 予約失敗時のエラーコードからエラーメッセージを取得する
+    @staticmethod
+    def getReserveErrorMessage(error_code: str) -> str | None:
+        if error_code in JKLive.RESERVE_ERROR_CODES:
+            return JKLive.RESERVE_ERROR_CODES[error_code]
+        else:
+            return None
+
+
+    # ニコ生がメンテナンス中やサーバーエラーでないかを確認
+    @staticmethod
+    def getNicoLiveStatus() -> tuple[bool, int]:
+        response = requests.get('https://live.nicovideo.jp/')  # レスポンスを取得
+        # HTTP ステータスコードで判定
+        if response.status_code == 200:
+            return (True, response.status_code)
+        else:
+            return (False, response.status_code)

@@ -3,18 +3,18 @@
 import argparse
 import configparser
 import copy
-import datetime as dt
 import dateutil.parser
 import locale
 import os
 import shutil
 import sys
 import time
+from datetime import datetime
+from datetime import timedelta
+from typing import Any
 
-from JKLive import JKLive
+from JKLive import JKLive, __version__
 
-# バージョン情報
-__version__ = '3.5.0'
 
 # このファイルが存在するフォルダの絶対パス
 current_folder = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -24,7 +24,7 @@ current_folder = os.path.dirname(os.path.abspath(sys.argv[0]))
 terminal_columns = shutil.get_terminal_size().columns - 1
 
 
-def main():
+def main() -> None:
 
     # locale モジュールで時間のロケールを日本語に変更する
     # 参考: https://qiita.com/jusotech10/items/89685331f017cf9386fd
@@ -54,38 +54,40 @@ def main():
     jikkyo_id = args.Channel.rstrip()
 
     # 時刻
-    now_datetime = dt.datetime.now().astimezone()
-    max_datetime = (now_datetime + dt.timedelta(days=8)).astimezone()
+    now_datetime = datetime.now().astimezone()
+    max_datetime = (now_datetime + timedelta(days=8)).astimezone()
 
     # 予約する番組の開始時刻
     # 次の朝4時の日付に設定
+    target_datetime: datetime | None = None
     if args.date is None:
         # 今日の朝4時はもう過ぎた
         if now_datetime.replace(hour=4, minute=0, second=0, microsecond=0).astimezone() <= now_datetime:
-            datetime = (now_datetime + dt.timedelta(days=1)).replace(hour=4, minute=0, second=0, microsecond=0).astimezone()
+            target_datetime = (now_datetime + timedelta(days=1)).replace(hour=4, minute=0, second=0, microsecond=0).astimezone()
         # 今日の朝4時はこれから
         elif now_datetime.replace(hour=4, minute=0, second=0, microsecond=0).astimezone() > now_datetime:
-            datetime = now_datetime.replace(hour=4, minute=0, second=0, microsecond=0).astimezone()
+            target_datetime = now_datetime.replace(hour=4, minute=0, second=0, microsecond=0).astimezone()
+        assert target_datetime is not None
     # 指定された時刻を設定
     else:
-        datetime = dateutil.parser.parse(args.date.rstrip()).astimezone()
+        target_datetime = dateutil.parser.parse(args.date.rstrip()).astimezone()
 
     # 予約する番組の配信時間の長さ
-    length = dt.timedelta(hours=int(args.length))
+    length = timedelta(hours=int(args.length))
     length_hour = int(args.length)
 
     # 行区切り
     print('=' * terminal_columns)
 
     # 予約可能期間外かチェック
-    if datetime > max_datetime:
+    if target_datetime > max_datetime:
         print(f"番組の予約に失敗しました。")
-        print(f"エラー: {datetime.strftime('%Y/%m/%d %H:%M')} は予約可能時間外のため予約できません。予約可能な期間は予約日から1週間です。")
+        print(f"エラー: {target_datetime.strftime('%Y/%m/%d %H:%M')} は予約可能時間外のため予約できません。予約可能な期間は予約日から1週間です。")
         print('=' * terminal_columns)
         sys.exit(1)
-    if datetime < now_datetime:
+    if target_datetime < now_datetime:
         print(f"番組の予約に失敗しました。")
-        print(f"エラー: {datetime.strftime('%Y/%m/%d %H:%M')} はすでに過ぎた日付です。予約可能な期間は予約日から1週間です。")
+        print(f"エラー: {target_datetime.strftime('%Y/%m/%d %H:%M')} はすでに過ぎた日付です。予約可能な期間は予約日から1週間です。")
         print('=' * terminal_columns)
         sys.exit(1)
     if length_hour > 168 or length_hour < 1:
@@ -153,16 +155,25 @@ def main():
     jikkyo_channel = JKLive.getJikkyoChannelName(jikkyo_id)
 
     print(f"{jikkyo_channel} の実況番組を " +
-          f"{datetime.strftime('%Y/%m/%d %H:%M')} から {(datetime + length).strftime('%Y/%m/%d %H:%M')} まで予約します。")
+          f"{target_datetime.strftime('%Y/%m/%d %H:%M')} から {(target_datetime + length).strftime('%Y/%m/%d %H:%M')} まで予約します。")
 
-    def post(real_datetime, real_length):
+    def post(real_datetime: datetime, real_length: timedelta) -> dict[str, Any]:
 
         # 0.5 秒待つ
         time.sleep(0.5)
 
         # インスタンスを作成
-        jklive = JKLive(jikkyo_id, real_datetime, real_length, nicologin_mail, nicologin_password,
-                        autorun_weekly, autorun_daily, commentfilter_enabled, tagedit_enabled)
+        jklive = JKLive(
+            jikkyo_id,
+            real_datetime,
+            real_length,
+            nicologin_mail,
+            nicologin_password,
+            autorun_weekly,
+            autorun_daily,
+            commentfilter_enabled,
+            tagedit_enabled,
+        )
 
         print('-' * terminal_columns)
         print(f"番組タイトル: {jklive.generateTitle()}")
@@ -189,14 +200,14 @@ def main():
     if length_hour <= 6:
 
         # 番組予約をそのまま実行
-        post(datetime, length)
+        post(target_datetime, length)
 
     # 番組の配信時間の長さが7時間以上
     # ユーザー番組は最長6時間までのため、番組を分割する
     elif length_hour > 6:
 
         # 予約した6時間ごとの番組に合わせてずらす時間
-        seek_datetime = copy.copy(datetime)
+        seek_datetime = copy.copy(target_datetime)
 
         # 残り配信時間
         length_hour_count = copy.copy(length_hour)
@@ -207,7 +218,7 @@ def main():
             if length_hour_count > 6:
 
                 # 6時間までの番組を予約
-                result = post(seek_datetime, dt.timedelta(hours=6))
+                result = post(seek_datetime, timedelta(hours=6))
 
                 # 06:00 ～ 08:30 にかけての定期メンテナンスとの重複時
                 # 04:00 ～ 06:00 の枠と 08:30 ～ 10:00 までの枠に分割する
@@ -218,14 +229,14 @@ def main():
                     print('06:00 ～ 08:30 は定期メンテナンス中のため、04:00 ～ 06:00 と 08:30 ～ 10:00 の枠に分割して予約します。')
 
                     # 04:00 ～ 06:00 の枠（2時間）
-                    post(seek_datetime, dt.timedelta(hours=2))
+                    post(seek_datetime, timedelta(hours=2))
 
                     # 08:30 ～ 10:00 の枠（1時間30分）
                     # 4時間30分という値は 04:00 からの 08:30 までの時間を示す
-                    post(seek_datetime + dt.timedelta(hours=4, minutes=30), dt.timedelta(hours=1, minutes=30))
+                    post(seek_datetime + timedelta(hours=4, minutes=30), timedelta(hours=1, minutes=30))
 
                 # 時間をずらす
-                seek_datetime = seek_datetime + dt.timedelta(hours=6)
+                seek_datetime = seek_datetime + timedelta(hours=6)
 
                 # 残り配信時間を減らす
                 length_hour_count = length_hour_count - 6
@@ -234,10 +245,10 @@ def main():
             else:
 
                 # 残り配信時間分の長さの番組を予約
-                post(seek_datetime, dt.timedelta(hours=length_hour_count))
+                post(seek_datetime, timedelta(hours=length_hour_count))
 
                 # 時間をずらす
-                seek_datetime = seek_datetime + dt.timedelta(hours=length_hour_count)
+                seek_datetime = seek_datetime + timedelta(hours=length_hour_count)
 
                 # 残り配信時間を減らす
                 length_hour_count = length_hour_count - length_hour_count

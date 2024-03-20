@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 import ctypes
-import datetime as dt
 import os
 import shutil
 import subprocess
 import sys
+from datetime import datetime
 
 from JKLive import JKLive
+
 
 # このファイルが存在するフォルダの絶対パス
 current_folder = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -20,7 +21,7 @@ terminal_columns = shutil.get_terminal_size().columns - 1
 # 参考: https://stackoverflow.com/questions/130763/request-uac-elevation-from-within-a-python-script
 def is_admin():
     try:
-        return ctypes.windll.shell32.IsUserAnAdmin()
+        return ctypes.windll.shell32.IsUserAnAdmin()  # type: ignore
     except Exception:
         return False
 
@@ -120,7 +121,7 @@ def main():
             if ':' in time:
                 # 参考: http://ututel.blog121.fc2.com/blog-entry-205.html
                 try:
-                    dt.datetime.strptime(f"2021-04-01T{time}:00", '%Y-%m-%dT%H:%M:%S')
+                    datetime.strptime(f"2021-04-01T{time}:00", '%Y-%m-%dT%H:%M:%S')
                     flg = True
                 except ValueError:  # 不正な時刻フォーマット
                     pass
