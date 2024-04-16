@@ -2,9 +2,7 @@
 name = "JKLiveReserver"
 version = "3.6.0"
 description = "ニコニコ実況用のコミュニティ番組を一括で自動予約（枠取り）するツール"
-authors = ["tsukumi <tsukumijima@users.noreply.github.com>"]
-# ref: https://github.com/python-poetry/poetry/issues/1537#issuecomment-1154642727
-classifiers = ["Private :: Do Not Upload"]
+package-mode = false
 
 [tool.taskipy.tasks]
 build-windows = "pyinstaller --onefile JKLiveReserver.py && mv dist/JKLiveReserver.exe JKLiveReserver.exe && pyinstaller --onefile JKLiveScheduler.py && mv dist/JKLiveScheduler.exe JKLiveScheduler.exe"
